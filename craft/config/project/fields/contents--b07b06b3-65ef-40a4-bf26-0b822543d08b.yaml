@@ -1,0 +1,10 @@
+columnSuffix: hlnzpkmm
+contentColumnType: string
+fieldGroup: 42be103a-44d5-449a-9ac3-491832448e75 # Common
+handle: contents
+instructions: null
+name: Contents
+searchable: false
+translationKeyFormat: null
+translationMethod: none
+type: markhuot\igloo\fields\Igloo

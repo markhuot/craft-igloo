@@ -1,0 +1,30 @@
+dateModified: 1658957117
+email:
+  fromEmail: mark@markhuot.com
+  fromName: Igloo
+  transportType: craft\mail\transportadapters\Sendmail
+meta:
+  __names__:
+    42be103a-44d5-449a-9ac3-491832448e75: Common # Common
+    50d227ff-c678-4f75-856b-f0cc6579d3a1: Igloo # Igloo
+    497a90a2-ee01-4bd3-b351-6b76253f3954: Default # Default
+    23297f7e-0852-48f7-999f-929b36f11d78: Pages # Pages
+    b07b06b3-65ef-40a4-bf26-0b822543d08b: Contents # Contents
+    e0d545ea-1605-4ab3-9fcd-43050086f21b: Igloo # Igloo
+plugins:
+  igloo:
+    edition: standard
+    enabled: true
+    schemaVersion: 1.0.0
+system:
+  edition: solo
+  live: true
+  name: Igloo
+  schemaVersion: 4.0.0.9
+  timeZone: America/Los_Angeles
+users:
+  allowPublicRegistration: false
+  defaultGroup: null
+  photoSubpath: null
+  photoVolumeUid: null
+  requireEmailVerification: true

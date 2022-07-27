@@ -4,4 +4,5 @@
 vendor
 storage/**
 !storage/.gitkeep
-config
+craft/cpresources
+craft/config/license.key

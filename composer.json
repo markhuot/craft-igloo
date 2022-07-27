@@ -1,0 +1,36 @@
+{
+    "name": "markhuot/craft-igloo",
+    "type": "craft-plugin",
+    "require": {
+        "craftcms/cms": "4.2.0.2",
+        "vlucas/phpdotenv": "^5.4.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Huot",
+            "email": "mark@markhuot.com"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "craftcms/plugin-installer": true,
+            "yiisoft/yii2-composer": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "markhuot\\igloo\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Igloo",
+        "handle": "igloo",
+        "class": "markhuot\\igloo\\Igloo"
+    },
+    "require-dev": {
+        "yiisoft/yii2-shell": "^2.0"
+    }
+}

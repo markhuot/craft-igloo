@@ -45,24 +45,6 @@ fieldLayouts:
         name: Content
         uid: ac5db6c9-1e7c-4160-b2d8-821018b66d09
         userCondition: null
-      -
-        elementCondition: null
-        elements:
-          -
-            elementCondition: null
-            fieldUid: 13da94fd-499a-47fb-8b91-b0f580ccbad7 # Sample Matrix Field
-            instructions: null
-            label: null
-            required: false
-            tip: null
-            type: craft\fieldlayoutelements\CustomField
-            uid: 21041c66-0400-4a0a-9574-7fdae866cdd7
-            userCondition: null
-            warning: null
-            width: 100
-        name: Samples
-        uid: 56d19bd4-f5ce-44d2-a75a-db44f5856233
-        userCondition: null
 handle: default
 hasTitleField: true
 name: Default

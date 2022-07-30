@@ -1,0 +1,19 @@
+columnSuffix: onajvssw
+contentColumnType: text
+fieldGroup: 42be103a-44d5-449a-9ac3-491832448e75 # Common
+handle: body
+instructions: null
+name: Body
+searchable: false
+settings:
+  byteLimit: null
+  charLimit: null
+  code: false
+  columnType: null
+  initialRows: 4
+  multiline: true
+  placeholder: null
+  uiMode: normal
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\PlainText

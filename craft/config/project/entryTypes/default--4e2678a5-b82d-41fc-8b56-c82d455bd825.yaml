@@ -1,5 +1,5 @@
 fieldLayouts:
-  ad393189-39b4-4556-9880-12d98f6543a7:
+  f0593b17-30d2-4c02-9ce8-fb4f30170825:
     tabs:
       -
         elementCondition: null
@@ -26,47 +26,29 @@ fieldLayouts:
             tip: null
             title: null
             type: craft\fieldlayoutelements\entries\EntryTitleField
-            uid: 52d5fc41-4868-4255-a1e8-60a2b89c56e5
+            uid: b4702396-24b4-44a2-bddf-38125d98c0d0
             userCondition: null
             warning: null
             width: 100
           -
             elementCondition: null
-            fieldUid: f24d7071-c1c8-436f-a818-f29cd02cc5d4 # Default Slot
+            fieldUid: d90131b1-fc22-454b-b5ae-e95cfa6373d3 # Body
             instructions: null
             label: null
             required: false
             tip: null
             type: craft\fieldlayoutelements\CustomField
-            uid: 425e56c2-4678-43b3-89a7-2097551e8ad2
+            uid: b0b13959-1694-4499-934e-d5356db46e25
             userCondition: null
             warning: null
             width: 100
         name: Content
-        uid: ac5db6c9-1e7c-4160-b2d8-821018b66d09
-        userCondition: null
-      -
-        elementCondition: null
-        elements:
-          -
-            elementCondition: null
-            fieldUid: 13da94fd-499a-47fb-8b91-b0f580ccbad7 # Sample Matrix Field
-            instructions: null
-            label: null
-            required: false
-            tip: null
-            type: craft\fieldlayoutelements\CustomField
-            uid: 21041c66-0400-4a0a-9574-7fdae866cdd7
-            userCondition: null
-            warning: null
-            width: 100
-        name: Samples
-        uid: 56d19bd4-f5ce-44d2-a75a-db44f5856233
+        uid: 851826b7-2285-45c7-bae4-b6586316269f
         userCondition: null
 handle: default
 hasTitleField: true
 name: Default
-section: 23297f7e-0852-48f7-999f-929b36f11d78 # Pages
+section: efcba510-ae58-450c-a6b3-8b55c1fdb11a # Text
 sortOrder: 1
 titleFormat: null
 titleTranslationKeyFormat: null

@@ -17,6 +17,11 @@ class ContentController extends Controller
     /** @var Field */
     protected $field;
 
+    /**
+     * Any content actions require an element and a field to act on. For example attaching
+     * a new component to a slot in an element or detaching an existing component from a
+     * slot. This unifies access to the element and field in one place.
+     */
     function beforeAction($action): bool
     {
         $elementId = \Craft::$app->request->getParam('elementId');
@@ -28,6 +33,11 @@ class ContentController extends Controller
         return parent::beforeAction($action);
     }
 
+    /**
+     * The default view for attaching a component to a slot. This allows you to create
+     * a new component via a slideout or re-use an existing content piece already in
+     * the system.
+     */
     function actionIndex()
     {
         return $this->asCpScreen()
@@ -45,6 +55,9 @@ class ContentController extends Controller
             ]);
     }
 
+    /**
+     * The post request to attach a component to an element.
+     */
     function actionAttach()
     {
         $this->requirePostRequest();
@@ -54,15 +67,44 @@ class ContentController extends Controller
             return $this->asSuccess('No content selected', []);
         }
 
-        Igloo::getInstance()->tree->attach($this->element, $this->field, $elements);
+        //Igloo::getInstance()->tree->attach($this->element, $this->field, $elements);
 
-        return $this->asSuccess('Content attached', []);
+        $templates = collect($elements)->map(function ($componentId) {
+            return \Craft::$app->view->renderTemplate('igloo/fields/_leaf.twig', [
+                'leaf' => \Craft::$app->elements->getElementById($componentId),
+                'actionData' => [
+                    'elementId' => $this->element->id,
+                    'fieldHandle' => $this->field->handle,
+                ]
+            ]);
+        });
+
+        return $this->asSuccess('Content attached', [
+            'domActions' => [
+                'insert' => $templates->toArray(),
+            ],
+        ]);
     }
 
+    /**
+     * The post request to detach a component from an element.
+     */
     function actionDetach()
     {
         $this->requirePostRequest();
 
-        return $this->asSuccess('Content detached');
+        $elements = \Craft::$app->request->getParam('elements');
+        if (empty($elements)) {
+            return $this->asSuccess('No content selected', []);
+        }
+
+        $elementUids = collect($elements)->map(fn ($id) => \Craft::$app->elements->getElementById($id))->pluck('uid');
+        Igloo::getInstance()->tree->detach($this->element, $this->field, $elements);
+
+        return $this->asSuccess('Content detached', [
+            'domActions' => [
+                'remove' => $elementUids->map(fn ($uid) => '[data-uid="' . $uid . '"]')->toArray(),
+            ],
+        ]);
     }
 }

@@ -10,6 +10,7 @@ use craft\services\Fields;
 use craft\web\UrlManager;
 use craft\web\View;
 use markhuot\igloo\services\Tree;
+use markhuot\igloo\twig\Extension;
 use yii\base\Event;
 
 /**
@@ -39,6 +40,8 @@ class Igloo extends Plugin
                     $event->rules['igloo/content'] = 'igloo/content/index';
                 }
             );
+
+            \Craft::$app->view->registerTwigExtension(new Extension);
 
             // Event::on(
             //     View::class,

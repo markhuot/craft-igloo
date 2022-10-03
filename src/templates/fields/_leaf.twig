@@ -1,0 +1,9 @@
+<li data-uid="{{ leaf.uid }}">
+    {{ leaf }}
+    <a href="#"
+       data-igloo-action="igloo/content/detach"
+       data-igloo-action-data='{{ actionData|merge({elements: [leaf.id]})|json_encode }}'
+    >
+        Delete
+    </a>
+</li>

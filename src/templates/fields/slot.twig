@@ -1,53 +1,15 @@
-{% set postData = {
+{% set actionData = {
     elementId: element.id,
     fieldHandle: field.handle,
 } %}
 
-<ul>
+<ul data-slot="{{ element.id }}:{{ field.handle }}">
     {% for leaf in tree %}
-        <li>
-            {{ leaf }}
-            <a href="#"
-               data-igloo-post="igloo/content/detach"
-               data-igloo-post-data='{{ postData|merge({componentId: leaf.id})|json_encode }}'
-            >
-                Delete
-            </a>
-        </li>
+        {% include "igloo/fields/_leaf" with { leaf: leaf, actionData: actionData } only %}
     {% endfor %}
 </ul>
 
-{% set url = cpUrl('igloo/content', postData) %}
-<a href="{{ url }}" onclick="new Craft.CpScreenSlideout('{{ url }}'); return false;">+ Content</a>
+{% set url = cpUrl('igloo/content', actionData|merge({append: 'foo'})) %}
+<a href="{{ url }}" data-igloo-slideout="{{ url }}">+ Content</a>
 
-<script>
-    document.addEventListener('click', (event) => {
-        let body = undefined;
-        let method = 'GET';
-        let url = undefined;
-
-        if (event.target.dataset.iglooPostData) {
-            body = JSON.parse(event.target.dataset.iglooPostData);
-        }
-
-        if (event.target.dataset.iglooPost) {
-            method = 'POST';
-            url = Craft.getCpUrl()
-            body = {
-                [Craft.csrfTokenName]: encodeURIComponent(Craft.csrfTokenValue),
-                action: event.target.dataset.iglooPost,
-                ...(body || {}),
-            }
-        }
-
-        if (url) {
-            fetch(url, {
-                method,
-                body: new URLSearchParams(body).toString(),
-                headers: {
-                    'content-type': 'application/x-www-form-urlencoded',
-                }
-            });
-        }
-    })
-</script>
+{{ iglooResource('ts/igloo.ts') }}

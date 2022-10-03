@@ -6,3 +6,5 @@ storage/**
 !storage/.gitkeep
 craft/cpresources
 craft/config/license.key
+craft/hot
+node_modules

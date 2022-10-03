@@ -41,4 +41,15 @@ class Tree
         }, $records);
     }
 
+    function detach(ElementInterface $element, Field $field, array $componentIds)
+    {
+        foreach ($componentIds as $componentId) {
+            \Craft::$app->db->createCommand()->delete(Table::COMPONENTS, [
+                'elementId' => $element->id,
+                'slot' => $field->handle,
+                'componentId' => $componentId,
+            ])->execute();
+        }
+    }
+
 }

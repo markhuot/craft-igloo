@@ -1,8 +1,0 @@
-baseUrl: $PRIMARY_SITE_URL
-handle: default
-hasUrls: true
-language: en-US
-name: Igloo
-primary: true
-siteGroup: 50d227ff-c678-4f75-856b-f0cc6579d3a1 # Igloo
-sortOrder: 1

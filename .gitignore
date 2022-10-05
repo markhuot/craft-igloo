@@ -2,9 +2,13 @@
 .idea
 .DS_Store
 vendor
-storage/**
-!storage/.gitkeep
+/storage
 craft/cpresources
 craft/config/license.key
 craft/hot
 node_modules
+composer.lock
+bootstrap.php
+/craft
+/web
+/config

@@ -2,10 +2,10 @@
     "name": "markhuot/craft-igloo",
     "type": "craft-plugin",
     "require": {
-        "craftcms/cms": "4.2.0.2",
-        "vlucas/phpdotenv": "^5.4.0"
+        "craftcms/cms": "^4.2"
     },
     "require-dev": {
+        "craftcms/craft": "^2.0",
         "yiisoft/yii2-shell": "^2.0"
     },
     "license": "MIT",

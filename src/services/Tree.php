@@ -4,13 +4,14 @@ namespace markhuot\igloo\services;
 
 use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\base\FieldInterface;
 use craft\db\Query;
 use markhuot\igloo\db\Table;
 
 class Tree
 {
 
-    function attach(ElementInterface $element, Field $field, array $componentIds, $index=0)
+    function attach(ElementInterface $element, FieldInterface $field, array $componentIds, $index=0)
     {
         foreach ($componentIds as $componentId) {
             $data = [
@@ -25,13 +26,13 @@ class Tree
         }
     }
 
-    function get(ElementInterface $element, Field $field)
+    function get(ElementInterface $element, string $slot)
     {
         $records = (new Query())
             ->from(Table::COMPONENTS)
             ->where([
                 'elementId' => $element->id,
-                'slot' => $field->handle,
+                'slot' => $slot,
             ])
             ->orderBy('lft')
             ->all();

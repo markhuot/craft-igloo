@@ -1,9 +1,11 @@
+{% do view.registerAssetBundle("markhuot\\igloo\\fields\\SlotAssetBundle") %}
+
 {% set actionData = {
     elementId: element.id,
     fieldHandle: field.handle,
 } %}
 
-<ul data-slot="{{ element.id }}:{{ field.handle }}">
+<ul data-slot="{{ element.id }}:{{ field.handle }}" data-uid="{{ field.uid }}">
     {% for leaf in tree %}
         {% include "igloo/fields/_leaf" with { leaf: leaf, actionData: actionData } only %}
     {% endfor %}
@@ -11,5 +13,3 @@
 
 {% set url = cpUrl('igloo/content', actionData|merge({append: 'foo'})) %}
 <a href="{{ url }}" data-igloo-slideout="{{ url }}">+ Content</a>
-
-{{ iglooResource('ts/igloo.ts') }}

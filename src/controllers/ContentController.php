@@ -44,10 +44,10 @@ class ContentController extends Controller
             ->title('Select content')
             ->addCrumb('Entries', UrlHelper::cpUrl('entries'))
             ->addCrumb($this->element->section->name, UrlHelper::cpUrl('entries/' . $this->element->section->handle))
-            ->addCrumb($this->element->title, $this->element->cpEditUrl ?? null)
+            ->addCrumb($this->element->title ?? 'Untitled', $this->element->cpEditUrl ?? null)
             ->action('igloo/content/attach')
             ->redirectUrl($this->element->cpEditUrl)
-            ->contentTemplate('igloo/_content/index', [
+            ->contentTemplate('igloo/content/index', [
                 'elements' => Entry::find()->limit(100)->all(),
                 'elementType' => get_class($this->element),
                 'elementId' => $this->element->id,
@@ -67,22 +67,26 @@ class ContentController extends Controller
             return $this->asSuccess('No content selected', []);
         }
 
-        //Igloo::getInstance()->tree->attach($this->element, $this->field, $elements);
+        Igloo::getInstance()->tree->attach($this->element, $this->field, $elements);
 
-        $templates = collect($elements)->map(function ($componentId) {
-            return \Craft::$app->view->renderTemplate('igloo/fields/_leaf.twig', [
+        $templates = collect($elements)
+            ->map(fn ($componentId) => \Craft::$app->view->renderTemplate('igloo/fields/_leaf.twig', [
                 'leaf' => \Craft::$app->elements->getElementById($componentId),
                 'actionData' => [
                     'elementId' => $this->element->id,
                     'fieldHandle' => $this->field->handle,
                 ]
-            ]);
-        });
+            ]));
+
+        $domActions = $templates->map(fn ($template) => [
+            'action' => 'insert',
+            'scope' => '[data-uid="' . $this->field->uid . '"]',
+            'position' => 'beforeend',
+            'html' => $template,
+        ]);
 
         return $this->asSuccess('Content attached', [
-            'domActions' => [
-                'insert' => $templates->toArray(),
-            ],
+            'domActions' => $domActions,
         ]);
     }
 
@@ -102,9 +106,10 @@ class ContentController extends Controller
         Igloo::getInstance()->tree->detach($this->element, $this->field, $elements);
 
         return $this->asSuccess('Content detached', [
-            'domActions' => [
-                'remove' => $elementUids->map(fn ($uid) => '[data-uid="' . $uid . '"]')->toArray(),
-            ],
+            'domActions' => $elementUids->map(fn ($uid) => [
+                'action' => 'remove',
+                'scope' => '[data-uid="' . $uid . '"]'
+            ])->toArray(),
         ]);
     }
 }

@@ -10,12 +10,12 @@ use markhuot\igloo\Igloo;
 class Slot extends Field
 {
 
-    function getInputHtml(mixed $value, ElementInterface $element = null): string
+    function getInputHtml($value, ElementInterface $element = null): string
     {
         return Craft::$app->getView()->renderTemplate('igloo/fields/slot', [
             'field' => $this,
             'element' => $element,
-            'tree' => Igloo::getInstance()->tree->get($element, $this),
+            'tree' => Igloo::getInstance()->tree->get($element, $this->handle),
         ]);
     }
 

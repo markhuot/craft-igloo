@@ -11,33 +11,33 @@ class Extension implements ExtensionInterface
     function getFunctions(): array
     {
         return [
-            new TwigFunction('iglooResource', [$this, 'iglooResource']),
+            // new TwigFunction('iglooResource', [$this, 'iglooResource']),
         ];
     }
 
-    function iglooResource($src)
-    {
-        $hotFilepath = \Craft::getAlias('@webroot') . '/hot';
+    // function iglooResource($src)
+    // {
+    //     $hotFilepath = \Craft::getAlias('@webroot') . '/hot';
+    //
+    //     return new Markup(file_exists($hotFilepath) ?
+    //         $this->getHotResource($src) :
+    //         $this->getBuiltResource($src), 'utf-8');
+    // }
 
-        return new Markup(file_exists($hotFilepath) ?
-            $this->getHotResource($src) :
-            $this->getBuiltResource($src), 'utf-8');
-    }
+    // function getHotResource($src) {
+    //     $hotFilepath = \Craft::getAlias('@webroot') . '/hot';
+    //     $hotUrl = file_get_contents($hotFilepath);
+    //
+    //     return '<script type="module" src="' . implode('/', [
+    //         rtrim($hotUrl, '/'),
+    //         'src',
+    //         ltrim($src, '/'),
+    //     ]) . '"></script>';
+    // }
 
-    function getHotResource($src) {
-        $hotFilepath = \Craft::getAlias('@webroot') . '/hot';
-        $hotUrl = file_get_contents($hotFilepath);
-
-        return '<script type="module" src="' . implode('/', [
-            rtrim($hotUrl, '/'),
-            'src',
-            ltrim($src, '/'),
-        ]) . '"></script>';
-    }
-
-    function getBuiltResource($src) {
-        return '';
-    }
+    // function getBuiltResource($src) {
+    //     return '';
+    // }
 
     public function getTokenParsers()
     {

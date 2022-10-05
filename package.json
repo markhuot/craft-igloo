@@ -1,18 +1,28 @@
 {
-  "name": "igloo",
-  "private": true,
-  "version": "0.0.0",
+  "name": "craft-igloo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build"
+    "start": "webpack --watch --mode=development",
+    "build": "webpack build --mode=production"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markhuot/craft-igloo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markhuot/craft-igloo/issues"
+  },
+  "homepage": "https://github.com/markhuot/craft-igloo#readme",
   "devDependencies": {
-    "laravel-vite-plugin": "^0.5.2",
-    "typescript": "^4.6.4",
-    "vite": "^3.0.0"
-  },
-  "dependencies": {
     "@types/qs": "^6.9.7",
-    "qs": "^6.11.0"
+    "qs": "^6.11.0",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
   }
 }

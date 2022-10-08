@@ -5,17 +5,18 @@
     <a href="{{ cpUrl('igloo/slot/' ~ field.handle ~ '/edit/' ~ element.id) }}" data-igloo-slideout>⚙</a>
 
     <div class="flex flex-gap-4">
-        {% for column in range(1, config.columns|default(1)) %}
-            {% set slotName = field.handle ~ (column > 1 ? ":#{column}" : '') %}
+        {% for column in range(0, (config.columns|default(1)) - 1) %}
+            {% set slotName = column == 0 ? 'default' : 'column' ~ column %}
             <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="space-y-4 width-full flex-grow">
-                {% set tree = craft.igloo.components(element, slotName) %}
+                {% set tree = craft.igloo.components(element, field, slotName) %}
                 {% for leaf in tree %}
-                    {% include "igloo/fields/_leaf" with { element: element, slot: slotName, leaf: leaf } only %}
+                    {% include "igloo/fields/_leaf" with { element: element, field: field, slot: slotName, leaf: leaf } only %}
                 {% endfor %}
 
                 {% if tree|length == 0 %}
                     {% set url = cpUrl('igloo/content', {
                         elementId: element.id,
+                        fieldId: field.id,
                         slot: slotName,
                         scope: null,
                         position: 'beforeend',

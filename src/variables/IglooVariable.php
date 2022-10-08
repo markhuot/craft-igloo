@@ -14,8 +14,8 @@ class IglooVariable
         return (new GetSlotConfig)->handle($field, $element);
     }
 
-    function components(ElementInterface $element, string $slot)
+    function components(ElementInterface $element, FieldInterface $field, string $slot)
     {
-        return Igloo::getInstance()->tree->get($element, $slot);
+        return Igloo::getInstance()->tree->get($element, $field, $slot);
     }
 }

@@ -3,7 +3,9 @@
 namespace markhuot\igloo\controllers;
 
 use craft\base\Element;
+use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\base\FieldInterface;
 use craft\elements\Entry;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
@@ -13,21 +15,27 @@ use markhuot\igloo\Igloo;
 
 class ContentController extends Controller
 {
-    /** @var Element */
+    /** @var ElementInterface */
     protected $element;
+
+    /** @var FieldInterface */
+    protected $field;
 
     /** @var string */
     protected $slot;
 
     /**
-     * Any content actions require an element and a slot to act on. For example attaching
-     * a new component to a slot in an element or detaching an existing component from a
-     * slot. This unifies access to the element and field in one place.
+     * Any content actions require an element and a field to act on. For example attaching
+     * a new component to a field in an element or detaching an existing component from a
+     * field. This unifies access to the element and field in one place.
      */
     function beforeAction($action): bool
     {
         $elementId = \Craft::$app->request->getParam('elementId');
         $this->element = \Craft::$app->elements->getElementById($elementId);
+
+        $fieldId = \Craft::$app->request->getParam('fieldId');
+        $this->field = \Craft::$app->fields->getFieldById($fieldId);
 
         $this->slot = \Craft::$app->request->getParam('slot');
 
@@ -50,8 +58,8 @@ class ContentController extends Controller
             ->redirectUrl($this->element->cpEditUrl)
             ->contentTemplate('igloo/content/index', [
                 'elements' => Entry::find()->limit(100)->all(),
-                'elementType' => get_class($this->element),
-                'elementId' => $this->element->id,
+                'element' => $this->element,
+                'field' => $this->field,
                 'slot' => $this->slot,
                 'scope' => $this->request->getParam('scope'),
                 'position' => $this->request->getParam('position'),
@@ -65,27 +73,15 @@ class ContentController extends Controller
     {
         $this->requirePostRequest();
 
-        $element = $this->element;
-        $slotName = $this->slot;
+        $scope = \Craft::$app->request->getParam('scope');
+        $position = \Craft::$app->request->getParam('position');
 
         $elements = \Craft::$app->request->getParam('elements');
         if (empty($elements)) {
             return $this->asSuccess('No content selected', []);
         }
 
-        $scope = \Craft::$app->request->getParam('scope');
-        $position = \Craft::$app->request->getParam('position');
-
-        if (empty($scope)) {
-            $leaves = (new GetLeavesForComponent())->handle($element);
-            if (count($leaves)) {
-                $element = \Craft::$app->elements->getElementById($leaves[0]->elementId);
-                $slotName = $leaves[0]->slot;
-                $scope = $leaves[0]->uid;
-            }
-        }
-
-        $slots = Igloo::getInstance()->tree->attach($element, $slotName, $elements, $scope, $position);
+        $slots = Igloo::getInstance()->tree->attach($this->element, $this->field, $this->slot, $elements, $scope, $position);
 
         // $domActions = collect($slots)
         //     ->map(function (SlotData $slot) use ($element, $slotName) {
@@ -107,16 +103,15 @@ class ContentController extends Controller
         //         'html' => $props[1],
         //     ]);
 
-        $field = \Craft::$app->fields->getFieldByHandle($slotName);
         $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
-            'element' => $element,
-            'field' => $field,
+            'element' => $this->element,
+            'field' => $this->field,
         ]);
 
         return $this->asSuccess('Content attached', [
             //'domActions' => $domActions,
             'domActions' => [
-                ['action' => 'replace', 'scope' => '[data-element="' . $element->id . '"][data-field="' . $field->id . '"]', 'html' => $html],
+                ['action' => 'replace', 'scope' => '[data-element="' . $this->element->id . '"][data-field="' . $this->field->id . '"]', 'html' => $html],
             ]
         ]);
     }
@@ -133,18 +128,17 @@ class ContentController extends Controller
             return $this->asSuccess('No content selected', []);
         }
 
-        Igloo::getInstance()->tree->detach($this->element, $this->slot, $elementUids);
+        Igloo::getInstance()->tree->detach($this->element, $this->field, $this->slot, $elementUids);
 
-        $field = \Craft::$app->fields->getFieldByHandle($this->slot);
         $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
             'element' => $this->element,
-            'field' => $field,
+            'field' => $this->field,
         ]);
 
         return $this->asSuccess('Content detached', [
             'domActions' => collect($elementUids)->map(fn ($uid) => [
                 'action' => 'replace',
-                'scope' => '[data-element="' . $this->element->id . '"][data-field="' . $field->id . '"]',
+                'scope' => '[data-element="' . $this->element->id . '"][data-field="' . $this->field->id . '"]',
                 'html' => $html,
             ])->toArray(),
         ]);

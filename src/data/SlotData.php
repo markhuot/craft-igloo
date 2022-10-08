@@ -4,23 +4,25 @@ namespace markhuot\igloo\data;
 
 class SlotData
 {
-    public $id;
-    public $elementId;
-    public $slot;
-    public $componentId;
-    public $lft;
-    public $rgt;
-    public $uid;
+    public int $id;
+    public int $parentId;
+    public int $fieldId;
+    public string $slot;
+    public int $childId;
+    public int $sort;
+    public \DateTime $dateCreated;
+    public string $uid;
 
     function __construct(array $slotRecord=null)
     {
         if ($slotRecord) {
-            $this->id = $slotRecord['id'];
-            $this->elementId = $slotRecord['elementId'];
+            $this->id = (int)$slotRecord['id'];
+            $this->parentId = (int)$slotRecord['parentId'];
+            $this->fieldId = (int)$slotRecord['fieldId'];
             $this->slot = $slotRecord['slot'];
-            $this->componentId = $slotRecord['componentId'];
-            $this->lft = $slotRecord['lft'];
-            $this->rgt = $slotRecord['rgt'];
+            $this->childId = (int)$slotRecord['childId'];
+            $this->sort = (int)$slotRecord['sort'];
+            $this->dateCreated = new \DateTime($slotRecord['dateCreated'], new \DateTimeZone('UTC'));
             $this->uid = $slotRecord['uid'];
         }
     }

@@ -6,6 +6,7 @@ use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
 use craft\db\Query;
+use craft\helpers\Db;
 use craft\helpers\StringHelper;
 use markhuot\igloo\data\SlotData;
 use markhuot\igloo\db\Table;
@@ -14,7 +15,7 @@ use yii\db\Expression;
 class Tree
 {
 
-    function attach(ElementInterface $element, string $slot, array $componentIds, string|null $scope, string $position)
+    function attach(ElementInterface $element, FieldInterface $field, string $slot, array $componentIds, string|null $scope, string $position)
     {
         if ($scope) {
             $scope = (new Query)
@@ -23,56 +24,34 @@ class Tree
                 ->one();
         }
 
-        if (empty($scope) && $position === 'beforeend') {
-            $max = (new Query)
-                ->select('MAX(rgt)')
-                ->from(Table::COMPONENTS)
-                ->where([
-                    'elementId' => $element->id,
-                    'slot' => $slot,
-                ])
-                ->scalar() ?? 0;
-        }
-        else if ($scope && $position === 'beforebegin') {
-            $max = $scope['lft'] - 1;
-        }
-        else if ($scope && $position === 'afterbegin') {
-            // not necessary for our app
-            throw new \Exception('Not implemented');
-        }
-        else if ($scope && $position === 'beforeend') {
-            $max = $scope['lft'];
+        if ($scope && $position === 'beforebegin') {
+            $sort = $scope['sort'];
         }
         else if ($scope && $position === 'afterend') {
-            $max = $scope['rgt'];
+            $sort = $scope['sort'] + 1;
+        }
+        else {
+            $sort = 0;
         }
 
         \Craft::$app->db->createCommand()->update(Table::COMPONENTS, [
-            'lft' => new \yii\db\Expression('`lft`+'.(count($componentIds) * 2)),
-            'rgt' => new \yii\db\Expression('`rgt`+'.(count($componentIds) * 2)),
+            'sort' => new Expression('`sort`+' . count($componentIds)),
         ], ['and',
-            ['elementId' => $element->id],
+            ['parentId' => $element->id],
+            ['fieldId' => $field->id],
             ['slot' => $slot],
-            ['>', 'lft', (int)$max]
+            ['>=', 'sort', $sort],
         ])->execute();
-
-        if (!empty($scope) && $position === 'beforeend') {
-            \Craft::$app->db->createCommand()->update(Table::COMPONENTS, [
-                'rgt' => new \yii\db\Expression('`rgt`+'.(count($componentIds) * 2)),
-            ], ['and',
-                ['>=', 'rgt', (int)$scope['rgt']],
-                ['<=', 'lft', (int)$scope['lft']],
-            ])->execute();
-        }
 
         $ids = [];
         foreach ($componentIds as $index => $componentId) {
             $data = [
-                'elementId' => $element->id,
+                'parentId' => $element->id,
+                'fieldId' => $field->id,
                 'slot' => $slot,
-                'componentId' => $componentId,
-                'lft' => $max + ($index * 2) + 1,
-                'rgt' => $max + ($index * 2) + 2,
+                'childId' => $componentId,
+                'sort' => $sort + $index,
+                'dateCreated' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
                 'uid' => StringHelper::UUID(),
             ];
 
@@ -94,39 +73,23 @@ class Tree
         return $data;
     }
 
-    function get(ElementInterface $element, string $slot)
+    function get(ElementInterface $element, FieldInterface $field, string $slot='default')
     {
         $records = (new Query())
             ->from(Table::COMPONENTS)
             ->where([
-                'elementId' => $element->id,
+                'parentId' => $element->id,
+                'fieldId' => $field->id,
                 'slot' => $slot,
             ])
-            ->orderBy('lft')
+            ->orderBy('sort')
             ->all();
 
-        if (empty($records)) {
-            $records = (new Query())
-                ->select('children.*')
-                ->from(Table::COMPONENTS . ' component')
-                ->where([
-                    'component.componentId' => $element->id,
-                ])
-                ->innerJoin(Table::COMPONENTS . ' children', '[[children.elementId]]=[[component.elementId]] and [[children.slot]]=[[component.slot]] and [[children.lft]]>[[component.lft]] and [[children.rgt]]<[[component.rgt]]')
-                ->orderBy('lft')
-                ->all();
-        }
-
+        /** @var ElementInterface[] $elements */
         $elements = [];
-        $skipUntil = null;
         foreach ($records as $record) {
-            if ($skipUntil && $record['lft'] < $skipUntil) {
-                continue;
-            }
-
-            $element = \Craft::$app->elements->getElementById($record['componentId']);
+            $element = \Craft::$app->elements->getElementById($record['childId']);
             $element->setSlot($record);
-            $skipUntil = $record['rgt'];
 
             $elements[] = $element;
         }
@@ -135,7 +98,7 @@ class Tree
     }
 
 
-    function detach(ElementInterface $element, string $slot, array $componentUids)
+    function detach(ElementInterface $element, FieldInterface $field, string $slot, array $componentUids)
     {
         foreach ($componentUids as $componentUid) {
             $row = (new Query)
@@ -143,24 +106,18 @@ class Tree
                 ->where(['uid' => $componentUid])
                 ->one();
 
-            \Craft::$app->db->createCommand()->delete(Table::COMPONENTS, ['and',
-                ['elementId' => $row['elementId']],
-                ['slot' => $row['slot']],
-                ['>=', 'lft', $row['lft']],
-                ['<=', 'rgt', $row['rgt']],
-            ])->execute();
-
             \Craft::$app->db->createCommand()->update(Table::COMPONENTS, [
-                'rgt' => new \yii\db\Expression('`rgt`-'.($row['rgt']-$row['lft']+1)),
+                'sort' => new Expression('`sort`-1'),
             ], ['and',
-                ['>=', 'rgt', (int)$row['rgt']],
-                ['<=', 'lft', (int)$row['lft']],
+                ['parentId' => $element->id],
+                ['fieldId' => $field->id],
+                ['slot' => $slot],
+                ['>', 'sort', $row['sort']],
             ])->execute();
 
-            \Craft::$app->db->createCommand()->update(Table::COMPONENTS, [
-                'lft' => new \yii\db\Expression('`lft`-'.($row['rgt']-$row['lft']+1)),
-                'rgt' => new \yii\db\Expression('`rgt`-'.($row['rgt']-$row['lft']+1)),
-            ], ['>', 'lft', (int)$row['lft']])->execute();
+            \Craft::$app->db->createCommand()->delete(Table::COMPONENTS, [
+                'uid' => $componentUid
+            ])->execute();
         }
     }
 

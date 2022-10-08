@@ -1,5 +1,6 @@
-{{ hiddenInput('elementType', elementType) }}
-{{ hiddenInput('elementId', elementId) }}
+{{ hiddenInput('elementType', className(element)) }}
+{{ hiddenInput('elementId', element.id) }}
+{{ hiddenInput('fieldId', field.id) }}
 {{ hiddenInput('slot', slot) }}
 {{ hiddenInput('scope', scope) }}
 {{ hiddenInput('position', position) }}
@@ -17,8 +18,8 @@
                            siteId: craft.app.sites.currentSite.id,
                            section: section.handle,
                            iglooAction: 'createAndAttach',
-                           iglooElement: elementId,
-                           iglooSlot: slot,
+                           iglooElement: element.id,
+                           iglooField: field.id,
                            iglooScope: scope,
                            iglooPosition: position,
                        }|json_encode }}'

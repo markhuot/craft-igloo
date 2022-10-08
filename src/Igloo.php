@@ -5,14 +5,18 @@ namespace markhuot\igloo;
 use Craft;
 use craft\base\Element;
 use craft\base\Plugin;
+use craft\elements\Entry;
+use craft\events\DefineBehaviorsEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Fields;
+use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
+use markhuot\igloo\behaviors\SlottedElementBehavior;
 use markhuot\igloo\services\Tree;
 use markhuot\igloo\twig\Extension;
+use markhuot\igloo\variables\IglooBehavior;
 use yii\base\Event;
-use yii\base\ModelEvent;
 
 /**
  * @property Tree $tree
@@ -41,6 +45,7 @@ class Igloo extends Plugin
                 UrlManager::EVENT_REGISTER_CP_URL_RULES,
                 function (RegisterUrlRulesEvent $event) {
                     $event->rules['igloo/content'] = 'igloo/content/index';
+                    $event->rules['igloo/slot/<fieldHandle:.+>/edit/<elementId:.+>'] = 'igloo/slot/edit';
                 }
             );
 
@@ -56,10 +61,29 @@ class Igloo extends Plugin
                         $fieldHandle = \Craft::$app->request->getParam('iglooSlot');
                         $elementId = \Craft::$app->request->getParam('iglooElement');
                         $element = \Craft::$app->elements->getElementById($elementId);
-                        $field = \Craft::$app->fields->getFieldByHandle($fieldHandle);
+                        $scope = \Craft::$app->request->getParam('iglooScope');
+                        $position = \Craft::$app->request->getParam('iglooPosition');
 
-                        Igloo::getInstance()->tree->attach($element, $field, [$component->id]);
+                        Igloo::getInstance()->tree->attach($element, $fieldHandle, [$component->id], $scope, $position);
                     }
+                }
+            );
+
+            Event::on(
+                CraftVariable::class,
+                CraftVariable::EVENT_INIT,
+                function(Event $event) {
+                    $event->sender->attachBehaviors([
+                        IglooBehavior::class,
+                    ]);
+                }
+            );
+
+            Event::on(
+                Entry::class,
+                Entry::EVENT_DEFINE_BEHAVIORS,
+                function (DefineBehaviorsEvent $event) {
+                    $event->behaviors[] = SlottedElementBehavior::class;
                 }
             );
 

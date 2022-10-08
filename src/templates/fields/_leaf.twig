@@ -1,11 +1,57 @@
-<li data-uid="{{ leaf.uid }}">
-    <a href="#" data-igloo-slideout="{{ leaf.cpEditUrl }}">
-        {{ leaf }}
-    </a>
-    <a href="#"
-       data-igloo-action="igloo/content/detach"
-       data-igloo-action-data='{{ actionData|merge({elements: [leaf.id]})|json_encode }}'
-    >
-        Delete
-    </a>
+{% set actionData = {
+    elementId: element.id,
+    slot: slot,
+} %}
+<li data-uid="{{ leaf.slot.uid }}">
+    <div class="border border-gray-200 rounded" tabindex="0">
+        <div class="flex justify-between items-center bg-gray-200 text-gray-800 p-1.5">
+            <a href="#" data-igloo-slideout="{{ leaf.cpEditUrl }}" class="text-inherit">
+                {{ leaf.type.name == 'Default' ? leaf.section.name : leaf.type.name }}: {{ leaf }}
+            </a>
+            <div class="relative">
+                <button class="" data-igloo-menu="menu-{{ leaf.slot.uid }}">&hellip;</button>
+                <ul class="z-[100] invisible absolute top-100 right-0 my-4 bg-white shadow-md rounded" data-igloo-menu="menu-{{ leaf.slot.uid }}">
+                    <li>
+                        <button href="#"
+                                class="block hover:bg-gray-200 focus:bg-gray-200 py-2 px-4"
+                                data-igloo-slideout="{{ cpUrl('igloo/content', actionData|merge({scope: leaf.slot.uid, position: 'beforebegin'})) }}"
+                        >
+                            Insert Content Before&hellip;
+                        </button>
+                    </li>
+                    <li>
+                        <button href="#"
+                                class="block hover:bg-gray-200 focus:bg-gray-200 py-2 px-4"
+                                data-igloo-slideout="{{ cpUrl('igloo/content', actionData|merge({scope: leaf.slot.uid, position: 'afterend'})) }}"
+                        >
+                            Insert Content After&hellip;
+                        </button>
+                    </li>
+                    <li>
+                        <button href="#"
+                           class="block hover:bg-gray-200 focus:bg-gray-200 py-2 px-4"
+                           data-igloo-action="igloo/content/detach"
+                           data-igloo-action-data='{{ actionData|merge({elements: [leaf.slot.uid]})|json_encode }}'
+                        >
+                            Delete
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="p-[20px_0_0_20px] -mr-[1px] -mb-[1px]">
+            {% set customFields = [] %}
+            {% for field in leaf.fieldLayout.getCustomFields() %}
+                {% if className(field) == 'markhuot\\igloo\\fields\\Slot' %}
+                    {% set customFields = customFields|merge([field]) %}
+                {% endif %}
+            {% endfor %}
+            {% for field in customFields %}
+                {% if customFields|length > 1 %}
+                    <p style="font-weight: bold; color: var(--medium-dark-text-color); margin-bottom: 5px;">{{ field.name }}</p>
+                {% endif %}
+                {{ field.getInputHtml(leaf.getFieldValue(field.handle), leaf)|raw }}
+            {% endfor %}
+        </div>
+    </div>
 </li>

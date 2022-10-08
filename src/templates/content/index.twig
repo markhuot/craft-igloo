@@ -1,32 +1,37 @@
 {{ hiddenInput('elementType', elementType) }}
 {{ hiddenInput('elementId', elementId) }}
-{{ hiddenInput('fieldHandle', fieldHandle) }}
+{{ hiddenInput('slot', slot) }}
+{{ hiddenInput('scope', scope) }}
+{{ hiddenInput('position', position) }}
 {% set sections = craft.app.sections.getAllSections() %}
-{% set actionData = {
-    elementId: elementId,
-    fieldHandle: fieldHandle,
-} %}
 
 <h2>New Content</h2>
 <table>
     {% for section in sections %}
-        <tr>
-            <td>
-                <a href="#"
-                   data-igloo-action="entries/create"
-                   data-igloo-action-data='{{ {
-                       siteId: craft.app.sites.currentSite.id,
-                       section: section.handle,
-                       iglooAction: 'createAndAttach',
-                       iglooElement: elementId,
-                       iglooSlot: fieldHandle,
-                   }|json_encode }}'
-                   data-igloo-slideout-action="replace"
-                >
-                    {{ section.name }}
-                </a>
-            </td>
-        </tr>
+        {% for type in section.entryTypes %}
+            <tr>
+                <td>
+                    <a href="#"
+                       data-igloo-action="entries/create"
+                       data-igloo-action-data='{{ {
+                           siteId: craft.app.sites.currentSite.id,
+                           section: section.handle,
+                           iglooAction: 'createAndAttach',
+                           iglooElement: elementId,
+                           iglooSlot: slot,
+                           iglooScope: scope,
+                           iglooPosition: position,
+                       }|json_encode }}'
+                       data-igloo-action-query='{{ {
+                            type: type.handle
+                       }|json_encode }}'
+                       data-igloo-slideout-action="replace"
+                    >
+                        {{ type.name == 'Default' ? section.name : type.name }}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
     {% endfor %}
 </table>
 

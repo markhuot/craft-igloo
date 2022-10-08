@@ -1,7 +1,8 @@
 import qs from 'qs';
+import './menu';
 
 type IglooResponseDomAction = {
-    action: 'insert' | 'remove';
+    action: 'insert' | 'remove' | 'replace';
     scope: string;
     position: 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend';
     html: string;
@@ -66,13 +67,19 @@ function handleResponse(response: IglooResponseBody, callerData: IglooCallerData
 
     if (response?.domActions) {
         response.domActions.forEach(action => {
-            const scope = document.querySelector(action.scope);
-            if (scope) {
+            const scopes = document.querySelectorAll(action.scope);
+            if (scopes.length) {
                 if (action.action === 'insert') {
-                    scope.insertAdjacentHTML(action.position, action.html)
+                    scopes.forEach(s => s.insertAdjacentHTML(action.position, action.html));
                 }
                 if (action.action === 'remove') {
-                    scope.remove();
+                    scopes.forEach(s => s.remove());
+                }
+                if (action.action === 'replace') {
+                    scopes.forEach(s => {
+                        s.insertAdjacentHTML('afterend', action.html);
+                        s.remove();
+                    });
                 }
             }
         })
@@ -83,6 +90,7 @@ document.addEventListener('click', async (event) => {
     let body = undefined;
     let method = 'GET';
     let url = undefined;
+    let query = undefined;
     const target = event.target! as HTMLElement;
     const callerData = {
         slideoutAction: target.dataset.iglooSlideoutAction as IglooCallerData['slideoutAction'],
@@ -102,15 +110,24 @@ document.addEventListener('click', async (event) => {
         }
     }
 
-    if (target.dataset.iglooSlideout) {
-        addSlideout(target.dataset.iglooSlideout, callerData);
+    if (target.dataset.iglooActionQuery) {
+        query = JSON.parse(target.dataset.iglooActionQuery)
+    }
 
-        event.preventDefault()
-        return false;
+    if (target.dataset.iglooSlideout !== undefined) {
+        const url = target.dataset.iglooSlideout || target.getAttribute('href');
+        if (url) {
+            addSlideout(url, callerData);
+
+            event.preventDefault()
+            return false;
+        }
     }
 
     if (url) {
-        const response = await (await fetch(url, {
+        event.preventDefault()
+
+        const response = await (await fetch(url+'&'+qs.stringify(query), {
             body: qs.stringify(body),
             method,
             headers: {

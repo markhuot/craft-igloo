@@ -1,15 +1,33 @@
 {% do view.registerAssetBundle("markhuot\\igloo\\fields\\SlotAssetBundle") %}
 
-{% set actionData = {
-    elementId: element.id,
-    fieldHandle: field.handle,
-} %}
+{% set config = craft.igloo.fieldConfig(field, element) %}
+<div data-element="{{ element.id }}" data-field="{{ field.id }}">
+    <a href="{{ cpUrl('igloo/slot/' ~ field.handle ~ '/edit/' ~ element.id) }}" data-igloo-slideout>⚙</a>
 
-<ul data-slot="{{ element.id }}:{{ field.handle }}" data-uid="{{ field.uid }}">
-    {% for leaf in tree %}
-        {% include "igloo/fields/_leaf" with { leaf: leaf, actionData: actionData } only %}
-    {% endfor %}
-</ul>
+    <div class="flex flex-gap-4">
+        {% for column in range(1, config.columns|default(1)) %}
+            {% set slotName = field.handle ~ (column > 1 ? ":#{column}" : '') %}
+            <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="space-y-4 width-full flex-grow">
+                {% set tree = craft.igloo.components(element, slotName) %}
+                {% for leaf in tree %}
+                    {% include "igloo/fields/_leaf" with { element: element, slot: slotName, leaf: leaf } only %}
+                {% endfor %}
 
-{% set url = cpUrl('igloo/content', actionData|merge({append: 'foo'})) %}
-<a href="{{ url }}" data-igloo-slideout="{{ url }}">+ Content</a>
+                {% if tree|length == 0 %}
+                    {% set url = cpUrl('igloo/content', {
+                        elementId: element.id,
+                        slot: slotName,
+                        scope: null,
+                        position: 'beforeend',
+                    }) %}
+                    <a href="{{ url }}"
+                       class="border border-gray-300 border-dashed px-4 py-2 rounded inline-block"
+                       data-igloo-slideout="{{ url }}"
+                    >
+                        + Content
+                    </a>
+                {% endif %}
+            </ul>
+        {% endfor %}
+    </div>
+</div>

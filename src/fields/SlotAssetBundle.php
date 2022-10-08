@@ -17,7 +17,7 @@ class SlotAssetBundle extends AssetBundle
         ];
 
         $this->css = [
-            // 'styles.css',
+            'igloo.css',
         ];
 
         parent::init();

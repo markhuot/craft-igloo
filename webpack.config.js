@@ -1,8 +1,10 @@
 const path = require('path');
+const postcssOptions = require('./postcss.config');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   entry: {
-    igloo: './src/ts/igloo.ts'
+    igloo: ['./src/ts/igloo.ts', './src/css/igloo.css'],
   },
   module: {
     rules: [
@@ -10,6 +12,19 @@ module.exports = {
         test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions,
+            },
+          },
+        ],
       },
     ],
   },
@@ -19,4 +34,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'src/resources'),
   },
+  plugins: [
+      new MiniCssExtractPlugin(),
+  ],
 };

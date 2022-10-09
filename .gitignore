@@ -12,3 +12,4 @@ bootstrap.php
 /craft
 /web
 /config
+.phpunit.result.cache

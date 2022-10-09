@@ -2,33 +2,36 @@
 
 {% set config = craft.igloo.fieldConfig(field, element) %}
 <div data-element="{{ element.id }}" data-field="{{ field.id }}">
-    <a href="{{ cpUrl('igloo/slot/' ~ field.handle ~ '/edit/' ~ element.id) }}" data-igloo-slideout>⚙</a>
-
-    <div class="flex flex-gap-4">
+    <div class="tw-flex tw-items-stretch">
         {% for column in range(0, (config.columns|default(1)) - 1) %}
             {% set slotName = column == 0 ? 'default' : 'column' ~ column %}
-            <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="space-y-4 width-full flex-grow">
+            <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="tw-mt-4 tw-space-y-4 tw-flex-grow">
                 {% set tree = craft.igloo.components(element, field, slotName) %}
                 {% for leaf in tree %}
                     {% include "igloo/fields/_leaf" with { element: element, field: field, slot: slotName, leaf: leaf } only %}
                 {% endfor %}
 
                 {% if tree|length == 0 %}
-                    {% set url = cpUrl('igloo/content', {
-                        elementId: element.id,
-                        fieldId: field.id,
-                        slot: slotName,
-                        scope: null,
-                        position: 'beforeend',
-                    }) %}
-                    <a href="{{ url }}"
-                       class="border border-gray-300 border-dashed px-4 py-2 rounded inline-block"
-                       data-igloo-slideout="{{ url }}"
-                    >
-                        + Content
-                    </a>
+                    <li class="tw-p-4 tw-pt-0">
+                        {% set url = cpUrl('igloo/content', {
+                            elementId: element.id,
+                            fieldId: field.id,
+                            slot: slotName,
+                            scope: null,
+                            position: 'beforeend',
+                        }) %}
+                        <a tabindex="0" href="{{ url }}"
+                           class="tw-border tw-border-gray-300 tw-border-dashed tw-text-gray-900 tw-px-2 tw-py-1 tw-rounded tw-inline-block hover:tw-bg-blue-100"
+                           data-igloo-slideout="{{ url }}"
+                        >
+                            + Content
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
+            {% if not loop.last %}
+                <div class="tw-w-4 tw-relative tw-group tw-cursor-ew-resize"><div class="tw-absolute tw-h-full tw-w-px tw-left-1/2 tw-bg-gray-200 group-hover:tw-bg-blue-400"></div></div>
+            {% endif %}
         {% endfor %}
     </div>
 </div>

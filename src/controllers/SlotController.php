@@ -45,6 +45,17 @@ class SlotController extends Controller
 
         (new UpsertSlotConfig)->handle($field, $element, $columns);
 
-        return $this->asSuccess('Slot saved');
+        $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
+            'element' => $element,
+            'field' => $field,
+        ]);
+
+        return $this->asSuccess('Slot saved', [
+            'domActions' => [[
+                'action' => 'replace',
+                'scope' => '[data-element="' . $element->id . '"][data-field="' . $field->id . '"]',
+                'html' => $html,
+            ]],
+        ]);
     }
 }

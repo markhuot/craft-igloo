@@ -58,13 +58,15 @@ class Igloo extends Plugin
                     $iglooAction = \Craft::$app->request->getParam('iglooAction');
 
                     if ($iglooAction === 'createAndAttach' && $component->isNewForSite) {
-                        $fieldHandle = \Craft::$app->request->getParam('iglooSlot');
                         $elementId = \Craft::$app->request->getParam('iglooElement');
                         $element = \Craft::$app->elements->getElementById($elementId);
+                        $fieldId = \Craft::$app->request->getParam('iglooField');
+                        $field = \Craft::$app->fields->getFieldById($fieldId);
+                        $slot = \Craft::$app->request->getParam('iglooSlot');
                         $scope = \Craft::$app->request->getParam('iglooScope');
                         $position = \Craft::$app->request->getParam('iglooPosition');
 
-                        Igloo::getInstance()->tree->attach($element, $fieldHandle, [$component->id], $scope, $position);
+                        Igloo::getInstance()->tree->attach($element, $field, $slot, [$component->id], $scope, $position);
                     }
                 }
             );

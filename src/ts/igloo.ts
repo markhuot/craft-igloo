@@ -91,7 +91,17 @@ document.addEventListener('click', async (event) => {
     let method = 'GET';
     let url = undefined;
     let query = undefined;
-    const target = event.target! as HTMLElement;
+
+    // Look up the tree in case the "target" is an element _inside_ the actual
+    // data-igloo- element we're actually concerned with
+    let target = event.target! as HTMLElement|null;
+    while (target && !target.dataset.iglooSlideout && !target.dataset.iglooAction) {
+        target = target.parentElement;
+    }
+    if (!target) {
+        return;
+    }
+
     const callerData = {
         slideoutAction: target.dataset.iglooSlideoutAction as IglooCallerData['slideoutAction'],
     }

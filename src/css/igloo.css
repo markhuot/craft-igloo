@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.rounded-children > li:first-child [class*="bg-"] {
+    @apply tw-rounded-t;
+}
+
+.rounded-children > li:last-child [class*="bg-"] {
+    @apply tw-rounded-b;
+}

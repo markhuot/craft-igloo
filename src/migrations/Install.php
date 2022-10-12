@@ -56,6 +56,17 @@ class Install extends Migration
 
         $this->createIndex(null, Table::CONFIG, ['fieldId', 'elementId'], true);
 
+        $this->createTable(Table::STYLES, [
+            'id' => $this->primaryKey(),
+            'elementId' => $this->integer()->notNull(),
+            'fieldId' => $this->integer(),
+            'slot' => $this->string(64),
+            'styles' => $this->text(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
         return true;
     }
 

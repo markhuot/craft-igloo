@@ -1,0 +1,86 @@
+{% do view.registerAssetBundle("markhuot\\igloo\\fields\\SlotAssetBundle") %}
+{{ hiddenInput('elementId', element.id) }}
+{{ hiddenInput('fieldId', field.id) }}
+{{ hiddenInput('slot', slot) }}
+
+{% macro label(label) %}
+    <div class="tw-flex tw-justify-between tw-items-center tw-text-xs tw-text-gray-500">
+        <label for="">{{ label }}</label>
+        <div class="tw-relative">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-4 tw-h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+            </svg>
+            <select class="tw-absolute tw-w-full tw-h-full tw-inset-0 tw-opacity-0">
+                <option>Default</option>
+                <option>+ Add Media Query</option>
+                <option>Hover</option>
+            </select>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro resetButton() %}
+    <button class="tw-appearance-none tw-py-2 tw-px-4">(x)</button>
+{% endmacro %}
+
+{% macro selectField(name, options) %}
+    <div class="tw-rounded tw-border tw-border-gray-400 tw-flex tw-items-center">
+        <select name="{{ name }}" class="tw-w-full tw-py-2 tw-px-4 tw-appearance-none">
+            {% for option in options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+        {{ _self.resetButton() }}
+    </div>
+{% endmacro %}
+
+{% macro inputField(type, name, value) %}
+    <div class="tw-rounded tw-border tw-border-gray-400 tw-flex tw-items-center">
+        <input type="{{ type }}" name="{{ name }}" class="tw-py-2 tw-px-4 tw-w-full tw-rounded">
+        {{ _self.resetButton() }}
+    </div>
+{% endmacro %}
+
+{% macro textField(name, value) %}
+    {{ _self.inputField('text', name, value) }}
+{% endmacro %}
+
+{% macro colorField(name, value) %}
+    {{ _self.inputField('color', name, value) }}
+{% endmacro %}
+
+<div class="tw-text-center">
+    <input type="search" placeholder="Filter..." class="tw-border tw-border-gray-400 tw-rounded-full tw-px-4">
+</div>
+
+<h2>Text</h2>
+<div class="tw-space-y-6">
+    <div class="tw-flex tw-justify-between tw-gap-4">
+        <div class="tw-flex-grow tw-space-y-1">
+            {{ _self.label('Font Family') }}
+            {{ _self.selectField('text[font][family]', [{label: 'Helvetica', value: 'helvetica'}]) }}
+        </div>
+        <div class="tw-flex-grow tw-space-y-1">
+            {{ _self.label('Font Size') }}
+            {{ _self.textField('text[font][size]', '') }}
+        </div>
+        <div class="tw-flex-grow tw-space-y-1">
+            {{ _self.label('Text Color') }}
+            {{ _self.colorField('text[font][color]', '') }}
+        </div>
+    </div>
+    <div class="tw-flex tw-justify-between tw-gap-4">
+        <div class="tw-flex-grow tw-space-y-1">
+            {{ _self.label('Letter Spacing') }}
+            {{ _self.textField('text[font][align]', '') }}
+        </div>
+        <div class="tw-flex-grow tw-space-y-1">
+            {{ _self.label('Line Height') }}
+            {{ _self.textField('text[font][align]', '') }}
+        </div>
+        <div class="tw-flex-grow tw-space-y-1">
+            {{ _self.label('Text Align') }}
+            {{ _self.textField('text[font][align]', '') }}
+        </div>
+    </div>
+</div>

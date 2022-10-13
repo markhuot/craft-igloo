@@ -57,6 +57,31 @@ class Tree
 
             \Craft::$app->db->createCommand()->insert(Table::COMPONENTS, $data)->execute();
             $ids[] = \Craft::$app->db->lastInsertID;
+
+            $ancestors = (new Query)
+                ->from(Table::COMPONENTS_PATHS)
+                ->where(['descendant' => $element->id])
+                ->all();
+
+            $rows = array_map(fn ($row) => [
+                'ancestor' => $row['ancestor'],
+                'descendant' => $componentId,
+                'depth' => $row['depth'] + 1,
+                'createdAt' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+                'uid' => StringHelper::UUID(),
+            ], $ancestors);
+            
+            $rows[] = [
+                'ancestor' => $componentId,
+                'descendant' => $componentId,
+                'depth' => 0,
+                'createdAt' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+                'uid' => StringHelper::UUID(),
+            ];
+            
+            foreach ($rows as $row) {
+                \Craft::$app->db->createCommand()->insert(Table::COMPONENTS_PATHS, $row);
+            }
         }
 
         $records = (new Query)

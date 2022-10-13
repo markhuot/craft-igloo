@@ -11,6 +11,8 @@
 |
 */
 
+use craft\db\Query;
+
 uses(
     markhuot\craftpest\test\TestCase::class,
     markhuot\craftpest\test\RefreshesDatabase::class,
@@ -29,6 +31,13 @@ uses(
 
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
+});
+
+expect()->extend('toBeInDatabase', function ($tableName) {
+    return $this->toBeGreaterThan((new Query)
+        ->from($tableName)
+        ->where($this->value)
+        ->count(), 0);
 });
 
 /*

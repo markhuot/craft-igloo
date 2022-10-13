@@ -1,0 +1,100 @@
+{% do view.registerAssetBundle("markhuot\\igloo\\fields\\SlotAssetBundle") %}
+
+{{ hiddenInput('elementId', element.id) }}
+{{ hiddenInput('fieldId', field.id) }}
+
+{% macro label(label) %}
+    <div class="tw-text-xs tw-text-gray-500">
+        <label for="">{{ label }}</label>
+    </div>
+{% endmacro %}
+
+{% macro resetButton() %}
+    <button class="tw-appearance-none tw-py-2 tw-px-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-3 tw-h-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+{% endmacro %}
+
+{% macro selectField(name, options, value) %}
+    <div class="tw-rounded-sm tw-border tw-border-gray-400 tw-flex tw-items-center">
+        <select name="{{ name }}" class="tw-w-full tw-py-2 tw-px-2 tw-appearance-none">
+            {% for option in options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+        {% if value %}
+            {{ _self.resetButton() }}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro inputField(type, name, value) %}
+    <div class="tw-rounded-sm tw-border tw-border-gray-400 tw-flex tw-items-center">
+        <input type="{{ type }}" name="{{ name }}" value="{{ value }}" class="tw-py-2 tw-px-2 tw-w-full tw-rounded-sm">
+        {% if value %}
+            {{ _self.resetButton() }}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro textField(name, value) %}
+    {{ _self.inputField('text', name, value) }}
+{% endmacro %}
+
+{% macro colorField(name, value) %}
+    {{ _self.inputField('color', name, value) }}
+{% endmacro %}
+
+<div class="tw-text-center">
+    <input type="search" placeholder="Filter..." class="tw-border tw-border-gray-400 tw-rounded-full tw-px-4">
+</div>
+
+<div class="tw-relative">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-8 tw-h-8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+    </svg>
+    <select class="tw-absolute tw-w-full tw-h-full tw-inset-0 tw-opacity-0">
+        <option>Default</option>
+        <option>+ Add Media Query</option>
+        <option>Hover</option>
+    </select>
+</div>
+
+<div class="tw-space-y-12">
+    <div class="tw-grid tw-grid-cols-2 tw-gap-4">
+        <div>
+            <h2>Positioning</h2>
+            <div class="tw-space-y-6">
+                {{ styles.position.getInputHtml() }}
+            </div>
+        </div>
+        <div>
+            <h2>Sizing</h2>
+            <div class="tw-space-y-6">
+                {{ styles.sizing.getInputHtml() }}
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2>Text</h2>
+        <div class="tw-space-y-6">
+            <div class="tw-grid tw-grid-cols-3 tw-justify-between tw-gap-4">
+                {{ styles.fontFamily.getInputHtml() }}
+                {{ styles.fontSize.getInputHtml() }}
+                {{ styles.fontColor.getInputHtml() }}
+            </div>
+            <div class="tw-grid tw-grid-cols-2 tw-justify-between tw-gap-4">
+                {{ styles.fontStyle.getInputHtml() }}
+                {{ styles.fontWeight.getInputHtml() }}
+            </div>
+            <div class="tw-grid tw-grid-cols-3 tw-justify-between tw-gap-4">
+                {{ styles.letterSpacing.getInputHtml() }}
+                {{ styles.lineHeight.getInputHtml() }}
+                {{ styles.textAlign.getInputHtml() }}
+            </div>
+        </div>
+    </div>
+</div>

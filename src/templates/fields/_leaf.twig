@@ -28,17 +28,25 @@
                     {% include "igloo/svg/more" %}
                 </button>
                 <ul class="tw-z-[100] tw-invisible tw-absolute tw-top-100 tw-right-0 tw-bg-white tw-shadow-lg tw-rounded tw-rounded-children -tw-translate-y-1 tw-transition-transform tw-transition-shadow tw-min-w-[250px]" data-igloo-menu="menu-{{ leaf.slot.uid }}">
-                    {% if customFields|length == 1 %}
                     <li>
                         <button href="#"
                                 class="tw-block tw-w-full tw-text-left hover:tw-bg-blue-100 tw-focus:bg-gray-200 tw-py-2 tw-px-4"
-                                data-igloo-slideout="{{ cpUrl('igloo/slot/' ~ field.handle ~ '/edit/' ~ leaf.id) }}"
+                                data-igloo-slideout="{{ cpUrl('igloo/styles/' ~ leaf.id ~ '/' ~ field.id) }}"
                         >
-                           Configure Layout&hellip;
+                            Edit Styles&hellip;
                         </button>
                     </li>
-                    <li class="tw-border-b tw-border-gray-200 tw-m-2"></li>
+                    {% if customFields|length == 1 %}
+                        <li>
+                            <button href="#"
+                                    class="tw-block tw-w-full tw-text-left hover:tw-bg-blue-100 tw-focus:bg-gray-200 tw-py-2 tw-px-4"
+                                    data-igloo-slideout="{{ cpUrl('igloo/slot/' ~ field.handle ~ '/edit/' ~ leaf.id) }}"
+                            >
+                               Configure Layout&hellip;
+                            </button>
+                        </li>
                     {% endif %}
+                    <li class="tw-border-b tw-border-gray-200 tw-m-2"></li>
                     <li>
                         <button href="#"
                                 class="tw-block tw-w-full tw-text-left hover:tw-bg-blue-100 tw-focus:bg-gray-200 tw-py-2 tw-px-4"

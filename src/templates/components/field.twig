@@ -1,0 +1,9 @@
+<div class="tw-space-y-1">
+    {% include 'igloo/components/label' with { label: label } only %}
+    <div class="tw-rounded-sm tw-border tw-border-gray-400 tw-flex tw-items-center">
+        {% block field %}{% endblock %}
+        {% if value %}
+            {% include 'igloo/components/reset-button' %}
+        {% endif %}
+    </div>
+</div>

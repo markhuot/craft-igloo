@@ -46,6 +46,7 @@ class Igloo extends Plugin
                 function (RegisterUrlRulesEvent $event) {
                     $event->rules['igloo/content'] = 'igloo/content/index';
                     $event->rules['igloo/slot/<fieldHandle:.+>/edit/<elementId:.+>'] = 'igloo/slot/edit';
+                    $event->rules['igloo/styles/<elementId:.+>/<fieldId:.+>'] = 'igloo/style/edit';
                 }
             );
 

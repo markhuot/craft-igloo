@@ -1,0 +1,9 @@
+{% extends 'igloo/components/input' %}
+
+{% block field %}
+<select name="{{ inputName }}" class="tw-w-full tw-py-2 tw-px-2 tw-appearance-none">
+    {% for optionValue, optionLabel in options %}
+        <option value="{{ optionValue }}" {{ optionValue == value ? 'selected' }}>{{ optionLabel }}</option>
+    {% endfor %}
+</select>
+{% endblock %}

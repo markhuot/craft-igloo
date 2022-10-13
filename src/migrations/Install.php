@@ -60,8 +60,9 @@ class Install extends Migration
             'id' => $this->primaryKey(),
             'elementId' => $this->integer()->notNull(),
             'fieldId' => $this->integer(),
-            'slot' => $this->string(64),
-            'styles' => $this->text(),
+            'slot' => $this->string(64)->notNull(),
+            'variant' => $this->string(64)->notNull(),
+            'styles' => $this->text()->notNull(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid(),
@@ -78,6 +79,7 @@ class Install extends Migration
         $this->dropTableIfExists(Table::COMPONENTS);
         $this->dropTableIfExists(Table::COMPONENTS_PATHS);
         $this->dropTableIfExists(Table::CONFIG);
+        $this->dropTableIfExists(Table::STYLES);
 
         return true;
     }

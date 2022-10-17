@@ -36,7 +36,21 @@ it('stores closure table', function($props) {
 
     Igloo::getInstance()->tree->attach($child, $field, 'default', [$grandchild->id], null, 'beforeend');
     Igloo::getInstance()->tree->attach($parent, $field, 'default', [$child->id], null, 'beforeend');
-
+    
     expect(['ancestor' => $child->id, 'descendant' => $grandchild->id])->toBeInDatabase(Table::COMPONENTS_PATHS);
     expect(['ancestor' => $parent->id, 'descendant' => $child->id])->toBeInDatabase(Table::COMPONENTS_PATHS);
-})->with('section and field')->only();
+})->with('section and field');
+
+it('eager loads descendants', function ($props) {
+    [$field, $section] = $props;
+    [$grandchild, $child, $parent] = Entry::factory()->section($section)->count(3)->create();
+    
+    Igloo::getInstance()->tree->attach($child, $field, 'default', [$grandchild->id], null, 'beforeend');
+    Igloo::getInstance()->tree->attach($parent, $field, 'default', [$child->id], null, 'beforeend');
+    
+    $child = $parent->{$field->handle}[0];
+    
+    expect(function() use ($child, $field) {
+        $grandchild = $child->{$field->handle}[0];
+    })->toNotTouchTheDatabase();
+})->with('section and field');

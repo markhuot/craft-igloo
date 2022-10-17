@@ -16,16 +16,8 @@ class Position extends Style
                     'fixed' => 'Fixed',
                 ]
             ],
-            'top' => [
-                'label' => 'Top',
-                'attribute' => 'top',
-                'template' => 'igloo/components/text-field'
-            ],
-            'left' => [
-                'label' => 'Left',
-                'attribute' => 'left',
-                'template' => 'igloo/components/text-field'
-            ],
+            'top',
+            'left',
         ];
     }
 }

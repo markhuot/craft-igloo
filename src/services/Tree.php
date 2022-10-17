@@ -58,29 +58,51 @@ class Tree
             \Craft::$app->db->createCommand()->insert(Table::COMPONENTS, $data)->execute();
             $ids[] = \Craft::$app->db->lastInsertID;
 
+            $rows = [];
+
             $ancestors = (new Query)
                 ->from(Table::COMPONENTS_PATHS)
                 ->where(['descendant' => $element->id])
                 ->all();
-
-            $rows = array_map(fn ($row) => [
+            $rows = array_merge($rows, array_map(fn ($row) => [
                 'ancestor' => $row['ancestor'],
                 'descendant' => $componentId,
                 'depth' => $row['depth'] + 1,
-                'createdAt' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+                'dateCreated' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
                 'uid' => StringHelper::UUID(),
-            ], $ancestors);
-            
+            ], $ancestors));
+
+            $descendants = (new Query)
+                ->from(Table::COMPONENTS_PATHS)
+                ->where(['ancestor' => $componentId])
+                ->all();
+            $rows = array_merge($rows, array_map(fn ($row) => [
+                'ancestor' => $element->id,
+                'descendant' => $row['descendant'],
+                'depth' => $row['depth'] + 1,
+                'dateCreated' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+                'uid' => StringHelper::UUID(),
+            ], $descendants));
+
             $rows[] = [
-                'ancestor' => $componentId,
+                'ancestor' => $element->id,
                 'descendant' => $componentId,
-                'depth' => 0,
-                'createdAt' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+                'depth' => 1,
+                'dateCreated' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
                 'uid' => StringHelper::UUID(),
             ];
             
+            // $rows[] = [
+            //     'ancestor' => $componentId,
+            //     'descendant' => $componentId,
+            //     'depth' => 0,
+            //     'dateCreated' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+            //     'uid' => StringHelper::UUID(),
+            // ];
+            
             foreach ($rows as $row) {
-                \Craft::$app->db->createCommand()->insert(Table::COMPONENTS_PATHS, $row);
+                //var_dump($row);
+                \Craft::$app->db->createCommand()->insert(Table::COMPONENTS_PATHS, $row)->execute();
             }
         }
 
@@ -94,6 +116,11 @@ class Tree
         foreach ($records as $record) {
             $data[] = new SlotData($record);
         }
+
+        // reset join data. we need to do this so subsequent requests
+        // will pull join data out of the DB again and get this newly
+        // attached data
+        $element->{$field->handle} = null;
 
         return $data;
     }

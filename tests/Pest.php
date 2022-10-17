@@ -12,6 +12,8 @@
 */
 
 use craft\db\Query;
+use craft\elements\db\ElementQuery;
+use yii\base\Event;
 
 uses(
     markhuot\craftpest\test\TestCase::class,
@@ -34,10 +36,24 @@ expect()->extend('toBeOne', function () {
 });
 
 expect()->extend('toBeInDatabase', function ($tableName) {
-    return $this->toBeGreaterThan((new Query)
+    $count = (new Query)
         ->from($tableName)
         ->where($this->value)
-        ->count(), 0);
+        ->count();
+
+    return expect((int)$count)->toBeGreaterThan(0);
+});
+
+expect()->extend('toNotTouchTheDatabase', function() {
+    $eventCallback = function ($event) {
+        expect(true)->toBe(false);
+    };
+
+    Event::on(ElementQuery::class, ElementQuery::EVENT_BEFORE_PREPARE, $eventCallback);
+    $closure = $this->value;
+    $closure();
+    Event::off(ElementQuery::class, ElementQuery::EVENT_BEFORE_PREPARE, $eventCallback);
+    expect(true)->toBe(true);
 });
 
 /*

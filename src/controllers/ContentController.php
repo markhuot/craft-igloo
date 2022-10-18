@@ -6,12 +6,19 @@ use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
+use craft\db\Query;
+use craft\db\Table as DbTable;
 use craft\elements\Entry;
+use craft\helpers\Db;
+use craft\helpers\ElementHelper;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use markhuot\igloo\actions\GetLeavesForComponent;
+use markhuot\igloo\actions\RemapDraftComponents;
 use markhuot\igloo\data\SlotData;
+use markhuot\igloo\db\Table;
 use markhuot\igloo\Igloo;
+use yii\db\conditions\OrCondition;
 
 class ContentController extends Controller
 {
@@ -33,6 +40,14 @@ class ContentController extends Controller
     {
         $elementId = \Craft::$app->request->getParam('elementId');
         $this->element = \Craft::$app->elements->getElementById($elementId);
+
+        // If we're interacting with an element it should always be on a draft version of that
+        // element. So, create a draft now for us to work on if it doesn't already exist.
+        if ($this->request->isActionRequest && !$this->element->isDraft && !$this->element->isProvisionalDraft) {
+            $draft = \Craft::$app->drafts->createDraft($this->element, \Craft::$app->user->identity->id, null, null, [], true);
+            $draft->setCanonical($this->element);
+            $this->element = $draft;
+        }
 
         $fieldId = \Craft::$app->request->getParam('fieldId');
         $this->field = \Craft::$app->fields->getFieldById($fieldId);
@@ -75,45 +90,11 @@ class ContentController extends Controller
 
         $scope = \Craft::$app->request->getParam('scope');
         $position = \Craft::$app->request->getParam('position');
+        $elements = \Craft::$app->request->getParam('elements', []);
 
-        $elements = \Craft::$app->request->getParam('elements');
-        if (empty($elements)) {
-            return $this->asSuccess('No content selected', []);
-        }
+        Igloo::getInstance()->tree->attach($this->element, $this->field, $this->slot, $elements, $scope, $position);
 
-        $slots = Igloo::getInstance()->tree->attach($this->element, $this->field, $this->slot, $elements, $scope, $position);
-
-        // $domActions = collect($slots)
-        //     ->map(function (SlotData $slot) use ($element, $slotName) {
-        //         $component = \Craft::$app->elements->getElementById($slot->componentId);
-        //         $component->setSlot($slot);
-        //
-        //         $template = \Craft::$app->view->renderTemplate('igloo/fields/_leaf.twig', [
-        //             'element' => $element,
-        //             'slot' => $slotName,
-        //             'leaf' => $component,
-        //         ]);
-        //
-        //         return [$component, $template];
-        //     })
-        //     ->map(fn ($props) => [
-        //         'action' => 'insert',
-        //         'scope' => empty($scope) ? '[data-element="' . $element . '"][data-slot="' . $slotName . '"]' : '[data-uid="' . $scope . '"]',
-        //         'position' => $position,
-        //         'html' => $props[1],
-        //     ]);
-
-        $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
-            'element' => $this->element,
-            'field' => $this->field,
-        ]);
-
-        return $this->asSuccess('Content attached', [
-            //'domActions' => $domActions,
-            'domActions' => [
-                ['action' => 'replace', 'scope' => '[data-element="' . $this->element->id . '"][data-field="' . $this->field->id . '"]', 'html' => $html],
-            ]
-        ]);
+        return $this->asIglooSuccess($this->element, $this->field, 'Content attached');
     }
 
     /**
@@ -123,24 +104,36 @@ class ContentController extends Controller
     {
         $this->requirePostRequest();
 
-        $elementUids = \Craft::$app->request->getParam('elements');
-        if (empty($elementUids)) {
-            return $this->asSuccess('No content selected', []);
+        $componentIds = \Craft::$app->request->getParam('elements', []);
+
+        $remap = new RemapDraftComponents;
+        if ($remap->needsRemapping($this->element, $componentIds)) {
+            $componentIds = $remap->handle($this->element, $componentIds);
         }
 
-        Igloo::getInstance()->tree->detach($this->element, $this->field, $this->slot, $elementUids);
+        Igloo::getInstance()->tree->detach($this->element, $this->field, $this->slot, $componentIds);
 
+        return $this->asIglooSuccess($this->element, $this->field, 'Content detached');
+    }
+
+    /**
+     * Response with Igloo specific JSON
+     */
+    protected function asIglooSuccess(ElementInterface $element, FieldInterface $field, string $message)
+    {
         $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
-            'element' => $this->element,
+            'element' => $element,
             'field' => $this->field,
         ]);
 
-        return $this->asSuccess('Content detached', [
-            'domActions' => collect($elementUids)->map(fn ($uid) => [
-                'action' => 'replace',
-                'scope' => '[data-element="' . $this->element->id . '"][data-field="' . $this->field->id . '"]',
-                'html' => $html,
-            ])->toArray(),
+        return $this->asSuccess($message, [
+            'events' => [
+                ['name' => 'createDraft', 'detail' => ['provisional' => $element->isProvisionalDraft]],
+                ['name' => 'markChanged', 'detail' => ['handle' => $this->field->handle]],
+            ],
+            'domActions' => [
+                ['action' => 'replace', 'scope' => '[data-element="' . $this->element->id . '"][data-field="' . $this->field->id . '"]', 'html' => $html],
+            ]
         ]);
     }
 }

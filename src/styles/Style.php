@@ -38,8 +38,9 @@ class Style
     function getCss()
     {
         return $this->selectors
-            ->map(fn ($s) => `{$s['attribute']}: {$s['value']};`)
-            ->join("\n");
+            ->filter(fn ($s) => $s['value'])
+            ->map(fn ($s) => "{$s['attribute']}: {$s['value']};")
+            ->join('');
     }
 
     function getInputHtml()

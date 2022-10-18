@@ -488,12 +488,6 @@ video {
 .tw-z-\[100\] {
   z-index: 100;
 }
-.tw-col-span-5 {
-  grid-column: span 5 / span 5;
-}
-.tw-col-start-3 {
-  grid-column-start: 3;
-}
 .tw-col-start-2 {
   grid-column-start: 2;
 }
@@ -502,10 +496,6 @@ video {
 }
 .tw-m-2 {
   margin: 0.5rem;
-}
-.tw-mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
 }
 .tw-mx-1 {
   margin-left: 0.25rem;
@@ -531,9 +521,6 @@ video {
 }
 .tw-flex {
   display: flex;
-}
-.tw-inline-flex {
-  display: inline-flex;
 }
 .tw-grid {
   display: grid;
@@ -568,6 +555,9 @@ video {
 .tw-w-8 {
   width: 2rem;
 }
+.tw-w-\[5px\] {
+  width: 5px;
+}
 .tw-min-w-\[250px\] {
   min-width: 250px;
 }
@@ -586,17 +576,14 @@ video {
      -moz-appearance: none;
           appearance: none;
 }
+.tw-grid-cols-\[1fr_4fr_1fr\] {
+  grid-template-columns: 1fr 4fr 1fr;
+}
 .tw-grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .tw-grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.tw-grid-cols-5 {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.tw-grid-cols-\[1fr_4fr_1fr\] {
-  grid-template-columns: 1fr 4fr 1fr;
 }
 .tw-items-center {
   align-items: center;
@@ -699,13 +686,13 @@ video {
   padding-left: 1rem;
   padding-right: 1rem;
 }
-.tw-py-1 {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
 .tw-py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+.tw-py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 }
 .tw-pt-0 {
   padding-top: 0px;
@@ -715,12 +702,6 @@ video {
 }
 .tw-text-center {
   text-align: center;
-}
-.tw-text-right {
-  text-align: right;
-}
-.tw-align-middle {
-  vertical-align: middle;
 }
 .tw-text-xs {
   font-size: 0.75rem;
@@ -802,13 +783,13 @@ video {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.tw-group:hover .group-hover\:tw-w-\[5px\] {
+  width: 5px;
+}
+
 .tw-group:hover .group-hover\:tw-bg-blue-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(96 165 250 / var(--tw-bg-opacity));
-}
-
-.\[\&\>input\]\:tw-border>input {
-  border-width: 1px;
 }
 
 .\[\&_input\]\:tw-rounded-sm input {

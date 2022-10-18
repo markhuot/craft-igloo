@@ -6,10 +6,14 @@ use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
 use craft\db\Query;
+use craft\db\Table as DbTable;
 use craft\helpers\Db;
+use craft\helpers\ElementHelper;
 use craft\helpers\StringHelper;
+use markhuot\igloo\actions\GetComponents;
 use markhuot\igloo\data\SlotData;
 use markhuot\igloo\db\Table;
+use markhuot\igloo\Igloo;
 use yii\db\Expression;
 
 class Tree
@@ -104,6 +108,17 @@ class Tree
                 //var_dump($row);
                 \Craft::$app->db->createCommand()->insert(Table::COMPONENTS_PATHS, $row)->execute();
             }
+
+            if (ElementHelper::shouldTrackChanges($element)) {
+                Db::upsert(DbTable::CHANGEDFIELDS, [
+                    'elementId' => $element->id,
+                    'siteId' => $element->siteId,
+                    'fieldId' => $field->id,
+                    'dateUpdated' => Db::prepareDateForDb(new \DateTime('now', new \DateTimeZone('UTC'))),
+                    'propagated' => $element->propagating,
+                    'userId' => \Craft::$app->user->identity->id,
+                ]);
+            }
         }
 
         $records = (new Query)
@@ -120,7 +135,7 @@ class Tree
         // reset join data. we need to do this so subsequent requests
         // will pull join data out of the DB again and get this newly
         // attached data
-        $element->{$field->handle} = null;
+        // $element->{$field->handle} = null;
 
         return $data;
     }
@@ -169,6 +184,11 @@ class Tree
 
             \Craft::$app->db->createCommand()->delete(Table::COMPONENTS, [
                 'uid' => $componentUid
+            ])->execute();
+
+            \Craft::$app->db->createCommand()->delete(Table::COMPONENTS_PATHS, [
+                'ancestor' => $element->id,
+                'descendant' => $row['childId']
             ])->execute();
         }
     }

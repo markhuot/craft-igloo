@@ -20,6 +20,7 @@ class FontFamily extends Style
     protected function getInputVars(string $name)
     {
         return ['options' => [
+            '' => '',
             'helvetica' => 'Helvetica',
             'arial' => 'Arial',
         ]];

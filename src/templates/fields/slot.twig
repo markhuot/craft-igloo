@@ -8,7 +8,7 @@
             <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="tw-mt-4 tw-space-y-4 tw-flex-grow">
                 {% set tree = craft.igloo.components(element, field, slotName) %}
                 {% for leaf in tree %}
-                    {% include "igloo/fields/_leaf" with { element: element, field: field, slot: slotName, leaf: leaf } only %}
+                    {% include "igloo/fields/_leaf" with { element: element, field: field, slot: slotName, leaf: leaf, isRootSlot: isRootSlot|default(false) } only %}
                 {% endfor %}
 
                 {% if tree|length == 0 %}
@@ -30,7 +30,7 @@
                 {% endif %}
             </ul>
             {% if not loop.last %}
-                <div class="tw-w-4 tw-relative tw-group tw-cursor-ew-resize"><div class="tw-absolute tw-h-full tw-w-px tw-left-1/2 tw-bg-gray-200 group-hover:tw-bg-blue-400"></div></div>
+                <div class="tw-w-4 tw-relative tw-group tw-cursor-ew-resize"><div class="tw-absolute tw-h-full tw-w-px tw-left-1/2 tw-bg-gray-200 group-hover:tw-w-[5px] group-hover:tw-bg-blue-400"></div></div>
             {% endif %}
         {% endfor %}
     </div>

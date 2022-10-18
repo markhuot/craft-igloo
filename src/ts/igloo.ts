@@ -8,9 +8,15 @@ type IglooResponseDomAction = {
     html: string;
 };
 
+type IglooResponseEvent = {
+    name: string;
+    detail: Record<string, any>;
+}
+
 type IglooResponseBody = {
     message: string;
     domActions?: IglooResponseDomAction[];
+    events?: IglooResponseEvent[];
     cpEditUrl?: string;
     entry?: any;
 };
@@ -81,6 +87,24 @@ function handleResponse(response: IglooResponseBody, callerData: IglooCallerData
                         s.remove();
                     });
                 }
+            }
+        })
+    }
+
+    if (response?.events) {
+        response.events.forEach(event => {
+            if (event.name === 'createDraft' && event.detail?.provisional) {
+                $('#main-form').data('elementEditor').initForProvisionalDraft();
+            }
+            if (event.name === 'markChanged') {
+                $('#main-form').data('elementEditor')?.preview?.$refreshBtn?.trigger('click');
+                // .prepend($("<div/>", {
+                //     class: "status-badge modified",
+                //     title: Craft.t("app", "This field has been modified.")
+                // }).append($("<span/>", {
+                //     class: "visually-hidden",
+                //     html: Craft.t("app", "This field has been modified.")
+                // })
             }
         })
     }

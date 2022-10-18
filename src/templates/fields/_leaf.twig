@@ -11,12 +11,9 @@
     {% endif %}
 {% endfor %}
 
-{# check if the element doing the render is the same element as from the URL, in which case we
-   render the root element differently #}
-{% set isRootElement = element.id == craft.app.requestedParams.elementId|default(false) %}
 {% set isFirstColumn = slot == 'default' %}
 
-<li data-uid="{{ leaf.slot.uid }}" class="{{ not isRootElement|default(false) and isFirstColumn ? 'tw-ml-8' : '' }}">
+<li data-uid="{{ leaf.slot.uid }}" class="{{ not isRootSlot|default(false) and isFirstColumn ? 'tw-ml-8' : '' }}">
     <div class="tw-border tw-border-gray-200 tw-rounded" tabindex="0">
         <div class="tw-flex tw-justify-between tw-items-center tw-bg-gray-100 tw-p-2">
             <a href="{{ leaf.cpEditUrl }}" data-igloo-slideout="{{ leaf.cpEditUrl }}" class="tw-text-inherit">

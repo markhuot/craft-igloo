@@ -2,7 +2,8 @@
     "name": "markhuot/craft-igloo",
     "type": "craft-plugin",
     "require": {
-        "craftcms/cms": "^4.2"
+        "craftcms/cms": "^4.2",
+        "hashids/hashids": "^4.1"
     },
     "require-dev": {
         "craftcms/craft": "^2.0",

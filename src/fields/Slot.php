@@ -5,15 +5,12 @@ namespace markhuot\igloo\fields;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
-use craft\db\Query;
+use markhuot\igloo\actions\GetComponents;
 use markhuot\igloo\actions\GetSlotConfig;
-use markhuot\igloo\db\Table;
 use markhuot\igloo\Igloo;
 
 class Slot extends Field
 {
-    static $eagerLoadMap = [];
-
     public static function hasContentColumn(): bool
     {
         return false;
@@ -21,49 +18,73 @@ class Slot extends Field
 
     function getInputHtml($value, ElementInterface $element = null): string
     {
+        $isRootSlot = false;
+        $elementId = \Craft::$app->requestedParams['elementId'] ?? null;
+        if ($elementId) {
+            $routeElement = \Craft::$app->elements->getElementById($elementId);
+            if (in_array($routeElement->id, [$element->id, $element->getCanonicalId()])) {
+                $isRootSlot = true;
+            }
+        }
+
         return Craft::$app->getView()->renderTemplate('igloo/fields/slot', [
             'field' => $this,
             'element' => $element,
+            'isRootSlot' => $isRootSlot,
             'config' => (new GetSlotConfig)->handle($this, $element),
         ]);
     }
 
-    public function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
+    function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
     {
         if (empty($element->id)) {
             return null;
         }
 
-        $paths = (new Query)
-            ->select('paths.*')
-            ->from(Table::COMPONENTS_PATHS . ' paths')
-            ->where([
-                'ancestor' => $element->id,
-                //'fieldId' => $this->id,
-            ])
-            ->leftJoin(Table::COMPONENTS . ' components', '[[components.parentId]]=[[paths.ancestor]] and [[components.childId]]=[[paths.descendant]]')
-            ->orderBy('paths.depth asc, components.sort asc')
-            ->all();
+        return (new GetComponents)->getComponents($element, $this);
+    }
 
-        $newPaths = collect($paths)
-            ->filter(function ($path) {
-                return collect(static::$eagerLoadMap)
-                    ->where('id', '=', $path['descendant'])
-                    ->count() == 0;
-            })
-            ->mapWithKeys(function ($path) {
-                $element = \Craft::$app->elements->getElementById($path['descendant']);
-    
-                return [$element->id => $element];
-            });
-            
-        static::$eagerLoadMap = static::$eagerLoadMap + $newPaths->toArray();
-        
-        return collect($paths)
-            ->map(fn ($p) => static::$eagerLoadMap[$p['descendant']])
-            ->values()
+    function serializeValue(mixed $value, ?ElementInterface $element = null): mixed
+    {
+        if (!$element) {
+            return [];
+        }
+
+        return (new GetComponents)
+            ->getRows($element, $this)
+            ->where('depth', '=', 1)
+            ->pluck('descendant')
             ->toArray();
+    }
 
+    function afterElementPropagate(ElementInterface $element, bool $isNew): void
+    {
+        $action = null;
+        if ($element?->getIsDraft() && $isNew && $element->duplicateOf) {
+            $action = 'duplicate';
+        }
+        else if (!$element?->getIsDraft() && $element?->duplicateOf?->getIsDraft()) {
+            $action = 'copy';
+        }
+        else {
+            return;
+        }
+
+        $oldComponentIds = (new GetComponents)
+            ->getRows($element, $this)
+            ->where('depth', '=', 1);
+
+        $newComponentIds = (new GetComponents)
+            ->getRows($element->duplicateOf, $this)
+            ->where('depth', '=', 1);
+
+        if ($action === 'copy') {
+            Igloo::getInstance()->tree->detach($element, $this, 'default', $oldComponentIds->pluck('uid')->toArray());
+            Igloo::getInstance()->tree->attach($element, $this, 'default', $newComponentIds->pluck('descendant')->toArray(), null, 'beforeend');
+        }
+        else if ($action === 'duplicate') {
+            Igloo::getInstance()->tree->attach($element, $this, 'default', $newComponentIds->pluck('descendant')->toArray(), null, 'beforeend');
+        }
     }
 
 }

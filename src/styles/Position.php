@@ -12,6 +12,7 @@ class Position extends Style
                 'attribute' => 'position',
                 'template' => 'igloo/components/select-field',
                 'options' => [
+                    '' => '',
                     'absolute' => 'Absolute',
                     'fixed' => 'Fixed',
                 ]

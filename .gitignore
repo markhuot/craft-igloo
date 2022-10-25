@@ -13,3 +13,4 @@ bootstrap.php
 /web
 /config
 .phpunit.result.cache
+cpresources

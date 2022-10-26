@@ -16,21 +16,19 @@ class GetSlotConfig
             'elementId' => $element?->id,
         ])->one();
 
-        if ($row['template'] ?? false) {
-            $row['template'] = json_decode($row['template'], true);
+        if ($row['columnSizes'] ?? false) {
+            $row['columnSizes'] = json_decode($row['columnSizes'], true);
         }
 
         if ($columnCount = ($row['columns'] ?? false)) {
             $row['columnWidths'] = [];
-            $lastStop = 0;
             for ($i=0; $i<$columnCount-1; $i++) {
-                $desiredStop = $row['template']['dividers'][$i] ?? false;
-                if (!$desiredStop && $i < $columnCount - 1) {
-                    $desiredStop = ($i+1) / $columnCount;
-                }
-                $lastStop = $row['columnWidths'][$i] = $desiredStop;
+                $lastStop = $row['columnWidths'][$i-1] ?? 0;
+                $desiredStop = $row['columnSizes'][$i] ?? (($i+1) / $columnCount);
+                $row['columnSizes'][$i] = $desiredStop;
+                $row['columnWidths'][$i] = $desiredStop - $lastStop;
             }
-            $row['columnWidths'][$columnCount-1] = 1 - $lastStop;
+            $row['columnWidths'][$columnCount-1] = 1 - $row['columnSizes'][$i-1];
         }
 
         return $row;

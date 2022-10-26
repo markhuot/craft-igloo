@@ -35,10 +35,10 @@
     {% if config %}
         {% for column in range(0, columnCount - 2) %}
             <div class="tw-w-4 tw-h-full tw-absolute tw-top-0 tw-left-0 tw-group tw-cursor-ew-resize"
-                 style="left: {{ config.columnWidths[column] * 100 }}%"
+                 style="left: {{ config.columnSizes[column] * 100 }}%"
                  data-igloo-draggable
                  data-igloo-draggable-axis="x"
-                 data-igloo-draggable-snap="0.3333"
+                 {% if config.grid %}data-igloo-draggable-snap="{{ 1 / config.grid }}"{% endif %}
                  data-igloo-action="{{ 'igloo/slot/store-column-sizing' }}"
                  data-igloo-action-body='{{ {element: element.id, field: field.id, dividerIndex: column}|json_encode }}'
             >

@@ -51,6 +51,9 @@ class Install extends Migration
             'fieldId' => $this->integer()->unsigned()->notNull(),
             'elementId' => $this->integer()->unsigned(),
             'columns' => $this->integer()->unsigned(),
+            'columnSizes' => $this->string('4096'),
+            'resizable' => $this->tinyInteger()->notNull(),
+            'grid' => $this->integer()->unsigned(),
             'template' => $this->text(),
         ]);
 

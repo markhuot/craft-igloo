@@ -7,10 +7,13 @@
 <p><input type="text" placeholder="1" class="text fullwidth" name="columns" value="{{ config.columns|default('') }}"></p>
 
 <p><label class="font-bold">Resizable</label></p>
-<p><input type="checkbox" name="resizable" value="1" {{ config.resizable|default(false)?'checked':'' }}></p>
+<p>
+    <input type="hidden" name="resizable" value="0">
+    <input type="checkbox" name="resizable" value="1" {{ config.resizable|default(false)?'checked':'' }}>
+</p>
 
 <p><label class="font-bold">Snap to grid</label></p>
-<p><input type="text" placeholder="12" class="text fullwidth" name="columns" value="{{ config.snapTo|default('') }}"></p>
+<p><input type="text" placeholder="12" class="text fullwidth" name="grid" value="{{ config.grid|default('') }}"></p>
 
 <hr>
 

@@ -42,8 +42,16 @@ class SlotController extends Controller
         $fieldHandle = \Craft::$app->request->getParam('fieldHandle');
         $field = \Craft::$app->fields->getFieldByHandle($fieldHandle);
         $columns = \Craft::$app->request->getParam('columns');
+        $resizable = \Craft::$app->request->getParam('resizable');
+        $grid = \Craft::$app->request->getParam('grid');
+        $config = (new GetSlotConfig)->handle($field, $element);
 
-        (new UpsertSlotConfig)->handle($field, $element, $columns);
+        (new UpsertSlotConfig)->handle($field, $element, [
+            'columns' => $columns,
+            'resizable' => $resizable,
+            'grid' => $grid,
+            'columnSizes' => $columns === $config['columns'] && $grid === $config['grid'] ? $config['columnSizes'] : null,
+        ]);
 
         $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
             'element' => $element,
@@ -73,10 +81,23 @@ class SlotController extends Controller
         $maxLeft = $this->request->getParam('maxLeft');
 
         $config = (new GetSlotConfig)->handle($field, $element);
-        $template = $config['template'] ?? [];
-        $template['dividers'][$dividerIndex] = ($left - $minLeft) / ($maxLeft - $minLeft);
-        (new UpsertSlotConfig)->handle($field, $element, $config['columns'], json_encode($template));
+        $config['columnSizes'][$dividerIndex] = ($left - $minLeft) / ($maxLeft - $minLeft);
 
-        return $this->asSuccess('Column layout saved.');
+        (new UpsertSlotConfig)->handle($field, $element, [
+            'columnSizes' => $config['columnSizes'],
+        ]);
+
+        $html = \Craft::$app->view->renderTemplate('igloo/fields/slot', [
+            'element' => $element,
+            'field' => $field,
+        ]);
+
+        return $this->asSuccess('Column layout saved', [
+            'domActions' => [[
+                'action' => 'replace',
+                'scope' => '[data-element="' . $element->id . '"][data-field="' . $field->id . '"]',
+                'html' => $html,
+            ]],
+        ]);
     }
 }

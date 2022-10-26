@@ -4,7 +4,13 @@
 <h2>Layout</h2>
 
 <p><label class="font-bold">Number of Columns</label></p>
-<input type="text" placeholder="1" class="text fullwidth" name="columns" value="{{ config.columns|default('') }}">
+<p><input type="text" placeholder="1" class="text fullwidth" name="columns" value="{{ config.columns|default('') }}"></p>
+
+<p><label class="font-bold">Resizable</label></p>
+<p><input type="checkbox" name="resizable" value="1" {{ config.resizable|default(false)?'checked':'' }}></p>
+
+<p><label class="font-bold">Snap to grid</label></p>
+<p><input type="text" placeholder="12" class="text fullwidth" name="columns" value="{{ config.snapTo|default('') }}"></p>
 
 <hr>
 

@@ -1,11 +1,12 @@
 {% do view.registerAssetBundle("markhuot\\igloo\\fields\\SlotAssetBundle") %}
 
 {% set config = craft.igloo.fieldConfig(field, element) %}
-<div data-element="{{ element.id }}" data-field="{{ field.id }}">
-    <div class="tw-flex tw-items-stretch">
-        {% for column in range(0, (config.columns|default(1)) - 1) %}
+<div data-element="{{ element.id }}" data-field="{{ field.id }}" data-igloo-draggable-container class="tw-relative">
+    {% set columnCount = config.columns|default(1) %}
+    <div class="tw-grid" style="grid-template-columns: {{ config.columnWidths|default([])|map(w => "#{w*100}%")|join(' ') }}">
+        {% for column in range(0, columnCount - 1) %}
             {% set slotName = column == 0 ? 'default' : 'column' ~ column %}
-            <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="tw-mt-4 tw-space-y-4 tw-flex-grow">
+            <ul data-element="{{ element.id }}" data-slot="{{ slotName }}" class="tw-mt-4 tw-space-y-4">
                 {% set tree = craft.igloo.components(element, field, slotName) %}
                 {% for leaf in tree %}
                     {% include "igloo/fields/_leaf" with { element: element, field: field, slot: slotName, leaf: leaf, isRootSlot: isRootSlot|default(false) } only %}
@@ -29,9 +30,21 @@
                     </li>
                 {% endif %}
             </ul>
-            {% if not loop.last %}
-                <div class="tw-w-4 tw-relative tw-group tw-cursor-ew-resize"><div class="tw-absolute tw-h-full tw-w-px tw-left-1/2 tw-bg-gray-200 group-hover:tw-w-[5px] group-hover:tw-bg-blue-400"></div></div>
-            {% endif %}
         {% endfor %}
     </div>
+    {% if config %}
+        {% for column in range(0, columnCount - 2) %}
+            <div class="tw-w-4 tw-h-full tw-absolute tw-top-0 tw-left-0 tw-group tw-cursor-ew-resize"
+                 style="left: {{ config.columnWidths[column] * 100 }}%"
+                 data-igloo-draggable
+                 data-igloo-draggable-axis="x"
+                 data-igloo-draggable-snap="0.3333"
+                 data-igloo-action="{{ 'igloo/slot/store-column-sizing' }}"
+                 data-igloo-action-body='{{ {element: element.id, field: field.id, dividerIndex: column}|json_encode }}'
+            >
+                <div class="tw-absolute tw-h-full tw-w-full tw-z-50" draggable="true"></div>
+                <div class="tw-absolute tw-h-full tw-w-px tw-left-1/2 tw-bg-gray-200 group-hover:tw-w-[5px] group-hover:tw-bg-blue-400 tw-select-none"></div>
+            </div>
+        {% endfor %}
+    {% endif %}
 </div>

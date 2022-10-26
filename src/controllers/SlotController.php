@@ -58,4 +58,25 @@ class SlotController extends Controller
             ]],
         ]);
     }
+
+    function actionStoreColumnSizing()
+    {
+        $this->requirePostRequest();
+
+        $fieldId = $this->request->getParam('field');
+        $field = \Craft::$app->fields->getFieldById($fieldId);
+        $elementId = $this->request->getParam('element');
+        $element = \Craft::$app->elements->getElementById($elementId);
+        $dividerIndex = $this->request->getParam('dividerIndex');
+        $left = $this->request->getParam('left');
+        $minLeft = $this->request->getParam('minLeft');
+        $maxLeft = $this->request->getParam('maxLeft');
+
+        $config = (new GetSlotConfig)->handle($field, $element);
+        $template = $config['template'] ?? [];
+        $template['dividers'][$dividerIndex] = ($left - $minLeft) / ($maxLeft - $minLeft);
+        (new UpsertSlotConfig)->handle($field, $element, $config['columns'], json_encode($template));
+
+        return $this->asSuccess('Column layout saved.');
+    }
 }

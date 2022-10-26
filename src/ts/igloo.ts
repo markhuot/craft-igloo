@@ -1,5 +1,6 @@
 import qs from 'qs';
 import './menu';
+import './draggable';
 
 type IglooResponseDomAction = {
     action: 'insert' | 'remove' | 'replace';

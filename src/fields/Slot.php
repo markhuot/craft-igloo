@@ -9,7 +9,9 @@ use craft\helpers\FileHelper;
 use Illuminate\Cache\CacheServiceProvider;
 use Illuminate\Contracts\Config\Repository as RepositoryContract;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Encryption\EncryptionServiceProvider;
 use Illuminate\Filesystem\FilesystemServiceProvider;
+use Illuminate\Http\Response;
 use markhuot\igloo\actions\GetComponents;
 use markhuot\igloo\actions\GetSlotConfig;
 use markhuot\igloo\Igloo;
@@ -23,12 +25,13 @@ class Slot extends Field
 
     function getInputHtml($value, ElementInterface $element = null): string
     {
-        $storagePath = \Craft::$app->getRuntimePath() . '/laravel';
+        $storagePath = CRAFT_BASE_PATH;
         FileHelper::createDirectory($storagePath);
         FileHelper::createDirectory($storagePath . '/bootstrap/cache');
         $_ENV['APP_PACKAGES_CACHE'] = $storagePath . '/packages.php';
 
-        $app = new \Illuminate\Foundation\Application($storagePath);
+        $app = new \markhuot\igloo\illuminate\Application(CRAFT_BASE_PATH);
+        $app->singleton('path', fn () => realpath(__DIR__ . '/..'));
         $app->singleton(\Illuminate\Contracts\Http\Kernel::class, \Illuminate\Foundation\Http\Kernel::class);
         $app->singleton(\Illuminate\Contracts\Debug\ExceptionHandler::class, \Illuminate\Foundation\Exceptions\Handler::class);
         $app->bind(\Illuminate\Foundation\Bootstrap\LoadConfiguration::class, function() use ($storagePath) {
@@ -37,22 +40,23 @@ class Slot extends Field
                 {
                     $appConfig = [
                         'name' => 'Laravel',
+                        'key' => 'base64:dG/v+Dc73X/5wB4kKn/gjuaJucxR+TMrcTFuygOdWCQ=',
+                        'cipher' => 'AES-256-CBC',
                         'providers' => [
                             \Illuminate\Cache\CacheServiceProvider::class,
+                            \Illuminate\Encryption\EncryptionServiceProvider::class,
                             \Illuminate\Filesystem\FilesystemServiceProvider::class,
                             \Illuminate\View\ViewServiceProvider::class,
                             \Illuminate\Translation\TranslationServiceProvider::class,
                             \Livewire\LivewireServiceProvider::class,
                         ],
-                        'view.paths' => [],
                         'aliases' => \Illuminate\Support\Facades\Facade::defaultAliases()->toArray(),
-                        'livewire' => [
-                            'class_namespace' => 'markhuot\\igloo\\components',
-                        ],
                     ];
-
                     $repository->set('app', $appConfig);
 
+                    $repository->set('livewire', [
+                        'class_namespace' => 'markhuot\\igloo\\components',
+                    ]);
 
                     $compiledViewPath = \Craft::$app->getRuntimePath() . '/laravel/views';
                     FileHelper::createDirectory($compiledViewPath);
@@ -70,8 +74,60 @@ class Slot extends Field
         $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
         $app['router']->get('/', fn () => view('index'));
         $input = new \Illuminate\Http\Request();
-        $status = $kernel->handle($input);
-        dd($status);
+
+        /** @var Response $response */
+        $response = $kernel->handle($input);
+        return $response->content();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // $isRootSlot = false;
         // $elementId = \Craft::$app->requestedParams['elementId'] ?? null;

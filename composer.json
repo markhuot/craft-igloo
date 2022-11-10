@@ -2,14 +2,22 @@
     "name": "markhuot/craft-igloo",
     "type": "craft-plugin",
     "require": {
+        "composer/composer": "dev-main as 2.2.15",
         "craftcms/cms": "^4.2",
-        "hashids/hashids": "^4.1"
+        "hashids/hashids": "^4.1",
+        "laravel/framework": "^9.39",
+        "livewire/livewire": "^2.10"
     },
     "require-dev": {
         "craftcms/craft": "^2.0",
-        "markhuot/craft-pest": "@dev",
-        "yiisoft/yii2-shell": "^2.0"
+        "yiisoft/yii2-queue": "dev-symfony-process-6 as 2.3.4"
     },
+    "repositories": [
+        {
+            "type": "github",
+            "url": "https://github.com/markhuot/yii2-queue"
+        }
+    ],
     "license": "MIT",
     "authors": [
         {

@@ -5,6 +5,11 @@ namespace markhuot\igloo\fields;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\helpers\FileHelper;
+use Illuminate\Cache\CacheServiceProvider;
+use Illuminate\Contracts\Config\Repository as RepositoryContract;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\FilesystemServiceProvider;
 use markhuot\igloo\actions\GetComponents;
 use markhuot\igloo\actions\GetSlotConfig;
 use markhuot\igloo\Igloo;
@@ -18,21 +23,71 @@ class Slot extends Field
 
     function getInputHtml($value, ElementInterface $element = null): string
     {
-        $isRootSlot = false;
-        $elementId = \Craft::$app->requestedParams['elementId'] ?? null;
-        if ($elementId) {
-            $routeElement = \Craft::$app->elements->getElementById($elementId);
-            if (in_array($routeElement->id, [$element->id, $element->getCanonicalId()])) {
-                $isRootSlot = true;
-            }
-        }
+        $storagePath = \Craft::$app->getRuntimePath() . '/laravel';
+        FileHelper::createDirectory($storagePath);
+        FileHelper::createDirectory($storagePath . '/bootstrap/cache');
+        $_ENV['APP_PACKAGES_CACHE'] = $storagePath . '/packages.php';
 
-        return Craft::$app->getView()->renderTemplate('igloo/fields/slot', [
-            'field' => $this,
-            'element' => $element,
-            'isRootSlot' => $isRootSlot,
-            'config' => (new GetSlotConfig)->handle($this, $element),
-        ]);
+        $app = new \Illuminate\Foundation\Application($storagePath);
+        $app->singleton(\Illuminate\Contracts\Http\Kernel::class, \Illuminate\Foundation\Http\Kernel::class);
+        $app->singleton(\Illuminate\Contracts\Debug\ExceptionHandler::class, \Illuminate\Foundation\Exceptions\Handler::class);
+        $app->bind(\Illuminate\Foundation\Bootstrap\LoadConfiguration::class, function() use ($storagePath) {
+            return new class extends \Illuminate\Foundation\Bootstrap\LoadConfiguration {
+                protected function loadConfigurationFiles(Application $app, RepositoryContract $repository)
+                {
+                    $appConfig = [
+                        'name' => 'Laravel',
+                        'providers' => [
+                            \Illuminate\Cache\CacheServiceProvider::class,
+                            \Illuminate\Filesystem\FilesystemServiceProvider::class,
+                            \Illuminate\View\ViewServiceProvider::class,
+                            \Illuminate\Translation\TranslationServiceProvider::class,
+                            \Livewire\LivewireServiceProvider::class,
+                        ],
+                        'view.paths' => [],
+                        'aliases' => \Illuminate\Support\Facades\Facade::defaultAliases()->toArray(),
+                        'livewire' => [
+                            'class_namespace' => 'markhuot\\igloo\\components',
+                        ],
+                    ];
+
+                    $repository->set('app', $appConfig);
+
+
+                    $compiledViewPath = \Craft::$app->getRuntimePath() . '/laravel/views';
+                    FileHelper::createDirectory($compiledViewPath);
+                    $repository->set('view', [
+                        'compiled' => $compiledViewPath,
+                        'paths' => [
+                            __DIR__ . '/../blade',
+                        ],
+                    ]);
+                }
+            };
+        });
+
+        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
+        $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+        $app['router']->get('/', fn () => view('index'));
+        $input = new \Illuminate\Http\Request();
+        $status = $kernel->handle($input);
+        dd($status);
+
+        // $isRootSlot = false;
+        // $elementId = \Craft::$app->requestedParams['elementId'] ?? null;
+        // if ($elementId) {
+        //     $routeElement = \Craft::$app->elements->getElementById($elementId);
+        //     if (in_array($routeElement->id, [$element->id, $element->getCanonicalId()])) {
+        //         $isRootSlot = true;
+        //     }
+        // }
+        //
+        // return Craft::$app->getView()->renderTemplate('igloo/fields/slot', [
+        //     'field' => $this,
+        //     'element' => $element,
+        //     'isRootSlot' => $isRootSlot,
+        //     'config' => (new GetSlotConfig)->handle($this, $element),
+        // ]);
     }
 
     function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
